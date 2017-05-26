@@ -1,6 +1,12 @@
 import beaver.Scanner;
+import soot.*;
+import soot.SootClass;
 import soot.jimple.infoflow.android.manifest.ProcessManifest;
 import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.util.Chain;
+
+import java.util.HashSet;
+import java.util.Iterator;
 
 public class Main {
     public static void main(String[] args) {
@@ -16,10 +22,10 @@ public class Main {
 
         generateCGForAPK(
                 // TODO @Yuxuan, replace this with your APK path
-                "/home/asif/MTP/Experiments/APK_CG/APK_CG/FileInputOutput.apk",
+                "/home/asif/MTP/Experiments/apimonitor/APIMonitor-beta/apks_old/GPSTracking.apk",
                 "output",
                 "android.jar",
-                "/home/asif/MTP/Experiments/apimonitor/APIMonitor-beta/processing/temp.txt");
+                "/home/asif/MTP/Experiments/apimonitor/APIMonitor-beta/logs/GPSTracking.log");
 
     }
 
@@ -40,10 +46,29 @@ public class Main {
         catch(Exception e){
             e.printStackTrace();
         }
+        Util.processing(apkPath);
         /////////////////////////////////////////
-        CallGraph cg = Util.generateCG();
-        // TODO @Yuxuan, replace this with your cg2dot
-        Util.printCG(cg, Config.getResultPs(),appPackageName);
+//        Chain<SootClass> classes = Scene.v().getClasses();
+//        Iterator<SootClass> sootClassIterator = classes.iterator();
+//        HashSet<SootClass> sootClassHashSet = new HashSet<SootClass>();
+//        while(sootClassIterator.hasNext())
+//        {
+//            SootClass sootClass = sootClassIterator.next();
+//            String className = sootClass.getName();
+//            if(className.contains(appPackageName))
+//                sootClassHashSet.add(sootClass);
+//        }
+//        printSootClassHashSet(sootClassHashSet); 
+//        CallGraph cg = Util.generateCG();
+//        // TODO @Yuxuan, replace this with your cg2dot
+//        Util.printCG(cg, Config.getResultPs(),appPackageName);
     }
+//    public static void printSootClassHashSet(HashSet<SootClass> sootClassHashSet){
+//        Iterator<SootClass> sootClassIterator = sootClassHashSet.iterator();
+//        while(sootClassIterator.hasNext()){
+//            String className = sootClassIterator.next();
+//            System.out.println("class:"+className
+//        }
+//    }
 
 }
