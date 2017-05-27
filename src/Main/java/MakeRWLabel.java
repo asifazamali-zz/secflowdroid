@@ -3,6 +3,7 @@ package Main.java;
 import ifc.LabelManager;
 import ifc.RWLabel;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Set;
@@ -13,12 +14,16 @@ import java.util.Set;
 public class MakeRWLabel
 {
   public RWLabel rwLabel = new RWLabel();
-  public LabelManager labelManager = new LabelManager();
-  public boolean makeRWLabel(Dictionary subLabel,String obj_id,boolean pub){
+  public LabelManager labelManager;
+  public MakeRWLabel(){
+     rwLabel = new RWLabel();
+//     labelManager = new LabelManager();
+  }
+  public Dictionary makeRWLabel(Dictionary subLabel,String obj_id,boolean pub,LabelManager labelManager){
     Set<String> readerSet = (Set) subLabel.get("readers");
     Set<String> writerSet = (Set) subLabel.get("writers");
     Dictionary ret = new Hashtable();
-    Dictionary temp2 = rwLabel.createObjLabel(subLabel,obj_id);
+    Dictionary temp2 = rwLabel.createObjLabel(subLabel,obj_id,labelManager);
     if(pub)
     {
 //      Set<String> readers = getAllReaders();
@@ -35,19 +40,24 @@ public class MakeRWLabel
 //      else{
       ret.put("boolean", false);
       ret.put("type", "public");
+      ret.put("label",temp2);
 //    }
     
     }
     else{
       ret.put("boolean",true);
       ret.put("type","private");
+      ret.put("label",temp2);
     }
+    System.out.println("Label created "+obj_id+" readers "+readerSet+" writers "+writerSet);
+    return  ret;
   }
-  public Dictionary makeSubLabel(String owner,String readers){
+  public Dictionary makeSubLabel(ArrayList<String> owner, ArrayList<String> readers){
     Dictionary ret = new Hashtable();
     ret.put("owner",owner);
     ret.put("readers",readers);
     ret.put("writers",owner);
+    System.out.println("label:"+owner+","+readers+","+owner+" created");
     return ret;
   }
   

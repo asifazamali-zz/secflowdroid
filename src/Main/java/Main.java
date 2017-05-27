@@ -25,12 +25,14 @@ public class Main {
                 "/home/asif/MTP/Experiments/apimonitor/APIMonitor-beta/apks_old/GPSTracking.apk",
                 "output",
                 "android.jar",
-                "/home/asif/MTP/Experiments/apimonitor/APIMonitor-beta/logs/GPSTracking.log");
+                "/home/asif/MTP/Experiments/apimonitor/APIMonitor-beta/logs/GPSTracking.log",
+                "sensitive_apis.txt",
+                "global_output_apis.txt");
 
     }
 
-    public static void generateCGForAPK(String apkPath, String outputPath, String sdkPath,String processedFile) {
-        String[] args = {"-i", apkPath, "-o", outputPath, "-sdk", sdkPath,"-file",processedFile};
+    public static void generateCGForAPK(String apkPath, String outputPath, String sdkPath,String processedFile,String sensitive_apis,String global_output_apis) {
+        String[] args = {"-i", apkPath, "-o", outputPath, "-sdk", sdkPath,"-file",processedFile,"-sensitive_apis",sensitive_apis,"-global_output_apis",global_output_apis};
         String appPackageName="";
         if (!Config.parseArgs(args)) {
             return;

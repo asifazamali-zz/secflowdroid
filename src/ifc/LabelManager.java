@@ -9,8 +9,10 @@ import java.util.Hashtable;
  */
 public class LabelManager
 {
-  public Dictionary d = new Hashtable();
-  public Dictionary getLabel(Dictionary d,String str){
+  public static Dictionary d = new Hashtable();;
+  public LabelManager(){
+  } 
+  public Dictionary getLabel(String str){
     if(d.get(str) != null){
       return (Dictionary) d.get(str);
     }

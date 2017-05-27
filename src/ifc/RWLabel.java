@@ -9,7 +9,7 @@ import java.util.*;
  */
 public class RWLabel
 {
-  public Dictionary createObjLabel(Dictionary sublabel,String obj_id){
+  public Dictionary createObjLabel(Dictionary sublabel,String obj_id,LabelManager labelManager){
     
     Dictionary objectLabel = new Hashtable();
     Set<String> hashSet = new HashSet<>();
@@ -18,7 +18,6 @@ public class RWLabel
     objectLabel.put("owner",sublabel.get("owner"));
     objectLabel.put("readers",sublabel.get("readers"));
     objectLabel.put("writers",sublabel.get("writers"));
-    LabelManager labelManager = new LabelManager();
     if(labelManager.saveLabel(obj_id,objectLabel))
       return objectLabel;
     return null;
@@ -26,9 +25,9 @@ public class RWLabel
   
   
   // returning dictionary first element : bool secondelement: dictionary
-  public Dictionary checkRead(Dictionary subLabel,Dictionary objLabel){
+  public Dictionary checkRead(Dictionary subLabel,Dictionary objLabel,LabelManager labelManager){
     Dictionary ret = new Hashtable();
-    if(subLabel.get("owner").subsetOf(objLabel.get("owner"))){
+    if(((Set)objLabel.get("owner")).containsAll((Set)subLabel.get("owner"))){
       Dictionary newsubLabel = changeLabelRead(subLabel,objLabel);
       ret.put("bool",true);
       ret.put("subLabel",newsubLabel);
@@ -41,10 +40,12 @@ public class RWLabel
     return ret;
   }
   
-  private Dictionary changeLabelRead(Dictionary subLabel,Dictionary objLabel){
+  public Dictionary changeLabelRead(Dictionary subLabel,Dictionary objLabel){
     Set<String> newR,newW;
-    newR = subLabel.get("readers").intersection(objLabel.get("readers"));
-    newW = subLabel.get("writers").intersection(objLabel.get("writers"));
+    newR = (Set)subLabel.get("readers");
+    (newR).retainAll((Set)(objLabel.get("readers")));
+    newW = (Set)subLabel.get("writers");
+    (newW).retainAll((Set)(objLabel.get("writers")));
     Dictionary newSubLabel = new Hashtable();
     newSubLabel.put("owner",subLabel.get("owner"));
     newSubLabel.put("readers",newR);
@@ -53,7 +54,7 @@ public class RWLabel
   }
   
   public boolean checkWrite(Dictionary subLabel,Dictionary objLabel){
-    boolean temp = subLabel.get("owner").subsetOf(objLabel.get("writers")) && subLabel.get("readers").supersetOf(objLabel.get("readers")) && subLabel.get("writers").subsetOf(objLabel.get("writers"));
+    boolean temp = ((Set)objLabel.get("writers")).containsAll((Set)subLabel.get("owner"))&& ((Set)subLabel.get("readers")).containsAll((Set)objLabel.get("readers")) && (((Set)objLabel.get("writers")).containsAll((Set)subLabel.get("writers")));
     if(temp)
       return true;
     return false;

@@ -1,12 +1,17 @@
+import Main.java.MakeRWLabel;
 import beaver.*;
 import beaver.Scanner;
+import callgraph.InformationFlowAnalysis;
 import fj.Hash;
+import fj.data.Array;
+import ifc.LabelManager;
 import soot.*;
 import soot.jimple.infoflow.android.manifest.ProcessManifest;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.UnitGraph;
+import soot.toolkits.scalar.ArraySparseSet;
 import soot.util.Chain;
 
 import java.io.*;
@@ -20,12 +25,18 @@ public class Util {
     public static ArrayList<String> classes= new ArrayList<>();
     public static ArrayList<String> methods= new ArrayList<>();
     public static ArrayList<String> apis= new ArrayList<>();
-
+    public static ArrayList<String> apiMethod = new ArrayList<>();
+    public static HashMap<String,ArrayList> sensitive_api_method = new HashMap<>();
+    public static HashMap<String,ArrayList> global_output_api_method = new HashMap<>();
+//    public static ArrayList<String> sensitiveApi = new ArrayList<>();
+//    public static ArrayList<String> sensitiveApiMethod = new ArrayList<>();
+//    public static ArrayList<String> globalOutputApi = new ArrayList<>();
+//    public static ArrayList<String> globalOutputApiMethod = new ArrayList<>();
     public static String appPackageName="";
-//    public static HashMap<SootClass,ArrayList> classMethodDict = new HashMap<>();
+    public static HashMap<SootClass,ArrayList> classMethodDict = new HashMap<>();
     public static Dictionary dict_class_method = new Hashtable(); // SootClass-->{SootMethod}
     public static Dictionary dict_methodName_method = new Hashtable();//MethodName-->{SootMethod}
-
+    
     public static String getTimeString() {
         long timeMillis = System.currentTimeMillis();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-hhmmss");
@@ -33,21 +44,23 @@ public class Util {
         return sdf.format(date);
     }
 
-    public static void logException(Exception e) {
-        StringWriter sw = new StringWriter();
-        e.printStackTrace(new PrintWriter(sw));
-        Util.LOGGER.warning(sw.toString());
-    }
-
-    public static float safeDivide(int obfuscated, int total) {
-        if (total <= 0) return 1;
-        return (float) obfuscated / total;
-    }
-
-    public static CallGraph generateCG() {
-        PackManager.v().runPacks();
-        return Scene.v().getCallGraph();
-    }
+//    public static void logException(Exception e) {
+//        StringWriter sw = new StringWriter();
+//        e.printStackTrace(new PrintWriter(sw));
+//        Util.LOGGER.warning(sw.toString());
+//    }
+//
+//    public static float safeDivide(int obfuscated, int total) {
+//        if (total <= 0) return 1;
+//        return (float) obfuscated / total;
+//    }
+//
+//    public static CallGraph generateCG() {
+//        PackManager.v().runPacks();
+//        return Scene.v().getCallGraph();
+//    }
+//    
+    
     public static void readLogFile(){
         try{
             BufferedReader bufferedReader = new BufferedReader(new FileReader(Config.filesToProcess));
@@ -57,21 +70,75 @@ public class Util {
                 System.out.println(line);
                 System.out.println("parts:"+parts[1]);
                 String[] partsSplit = parts[1].split("->");
-                System.out.println("partSplit:"+partsSplit[0]+" "+partsSplit[1]+" "+partsSplit[2]);
+                System.out.println("partSplit:"+partsSplit[0]+" "+partsSplit[1]+" "+partsSplit[2]+partsSplit[3]);
                 classes.add(partsSplit[0]);
                 methods.add(trimMethods(partsSplit[1]));
-                apis.add(trimApis(partsSplit[2]));
+                apis.add(partsSplit[2]);
+                apiMethod.add(trimApiMethod(partsSplit[3]));
                 line = bufferedReader.readLine();
             }
         }
         catch(Exception e){
             e.printStackTrace();
         }
-        System.out.println("Classes");
+//        System.out.println("Classes");
 //        printArrayListString(classes);
-        System.out.println("Methods");
+//        System.out.println("Methods");
 //        printArrayListString(methods);
-        System.out.println("apis");
+//        System.out.println("apis");
+//        printArrayListString(apis);
+    }
+    public static void readSensitiveApiFile(){
+        try{
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(Config.filesToProcess));
+            String line = bufferedReader.readLine();
+            while(line!=null){
+                String[] parts = line.split("->");
+                System.out.println(line);
+                if(sensitive_api_method.get(parts[0]) != null)
+                    sensitive_api_method.get(parts[0]).add(parts[1]);
+                else{
+                    ArrayList<String> stringArrayList = new ArrayList();
+                    stringArrayList.add(parts[1]);
+                    sensitive_api_method.put(parts[0],stringArrayList);
+                }
+                line = bufferedReader.readLine();
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+//        System.out.println("Classes");
+//        printArrayListString(classes);
+//        System.out.println("Methods");
+//        printArrayListString(methods);
+//        System.out.println("apis");
+//        printArrayListString(apis);
+    }
+    public static void readGlobalOutputFile(){
+        try{
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(Config.filesToProcess));
+            String line = bufferedReader.readLine();
+            while(line!=null){
+                String[] parts = line.split("->");
+                if(global_output_api_method.get(parts[0]) != null)
+                    global_output_api_method.get(parts[0]).add(parts[1]);
+                else{
+                    ArrayList<String> stringArrayList = new ArrayList();
+                    stringArrayList.add(parts[1]);
+                    global_output_api_method.put(parts[0],stringArrayList);
+                }
+                line = bufferedReader.readLine();
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+//        System.out.println("Classes");
+//        printArrayListString(classes);
+//        System.out.println("Methods");
+//        printArrayListString(methods);
+//        System.out.println("apis");
 //        printArrayListString(apis);
     }
     public static void processing(String apkPath){
@@ -111,19 +178,48 @@ public class Util {
     
     public static void flowControl(){
         System.out.println("flowAnalysis");
+        MakeRWLabel makeRWLabel = new MakeRWLabel();
+        ArrayList<String> subOwner = new ArrayList();
+        subOwner.add(appPackageName);
+        ArrayList<String> readers = new ArrayList();
+        readers.add(appPackageName);
+        readers.add("public");
+
+        Dictionary subLabel = makeRWLabel.makeSubLabel(subOwner,readers); // subjectLevel(packageName,packageName,packageName)
+        LabelManager labelManager = new LabelManager();
+        labelManager.saveLabel("S1",subLabel);
+        PrintStream ps = Config.getResultPs();
+
         for(int i =0;i<classes.size();i++){
-            System.out.println("---------------------------------------------------");
-            System.out.println(classes.get(i)+"."+methods.get(i)+"."+apis.get(i));
-            System.out.println("---------------------------------------------------");
-            System.out.println("methodName:"+methods.get(i)+"methodObject"+dict_class_method.get(methods.get(i)));
+            ps.println("---------------------------------------------------");
+            ps.println(classes.get(i)+"."+methods.get(i)+"."+apis.get(i));
+            ps.println("---------------------------------------------------");
+            ps.println("methodName:"+methods.get(i));
             SootMethod sootMethod = (SootMethod) dict_methodName_method.get(methods.get(i));
             Body b = sootMethod.retrieveActiveBody();
-            Chain<Unit> unitChain = b.getUnits();
-            Iterator<Unit> unitIterator = unitChain.iterator();
-            while(unitIterator.hasNext()){
-                Unit unit = unitIterator.next();
-                System.out.println(unit.toString());
+            UnitGraph unitGraph = new ExceptionalUnitGraph(b);
+            InformationFlowAnalysis informationFlowAnalysis = new InformationFlowAnalysis(unitGraph,labelManager,subLabel,classes.get(i));
+            Iterator itr = unitGraph.iterator();
+//            System.out.println("UnitGraphCreated");
+            while(itr.hasNext()){
+                Unit u = (Unit) itr.next();
+                ArraySparseSet IN = InformationFlowAnalysis.getInOutBefore(u);
+                ArraySparseSet OUT = InformationFlowAnalysis.getInOutAfter(u);
+
+//                ps.print("IN : ");
+//                ps.println(IN.toString());
+                ps.print("Statement : ");
+                ps.println(u.toString());
+//                ps.print("Out : ");
+//                ps.println(OUT.toString() + "\n");
             }
+//            Chain<Unit> unitChain = b.getUnits();
+//            Iterator<Unit> unitIterator = unitChain.iterator();
+//            while(unitIterator.hasNext()){
+//                Unit unit = unitIterator.next();
+//                System.out.println(unit.toString());
+//                //
+//            }
             
         }
     }
@@ -250,7 +346,7 @@ public class Util {
     public static String trimMethods(String str){
        return str.split("\\(")[0];
     }
-    public static String trimApis(String str){
+    public static String trimApiMethod(String str){
        return str.split("\\(")[0]; 
     }
     

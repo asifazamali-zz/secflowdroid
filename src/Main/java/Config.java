@@ -41,6 +41,9 @@ public class Config {
     // store processedFile
     public static String filesToProcess;
     
+    public static String sensitiveApiFile;
+    public static String outputGlobalFile;
+    
     public static boolean parseArgs(String[] args) {
         org.apache.commons.cli.Options options = new org.apache.commons.cli.Options();
         Option quiet = new Option("quiet", "be extra quiet");
@@ -53,6 +56,10 @@ public class Config {
                 .longOpt("android-sdk").hasArg().desc("path to android.jar").build();
         Option processedFile = Option.builder("file").argName("temp.txt").required()
           .longOpt("processedFile").hasArg().desc("fileToProcess").build();
+        Option sensitiveApi = Option.builder("sensitive_apis").argName("sensitive_apis").required()
+          .longOpt("sensitive_apis").hasArg().desc("sensitive_apis.txt").build();
+        Option globalOutput = Option.builder("global_output_apis").argName("global_output_apis").required()
+          .longOpt("global_output_apis").hasArg().desc("global_output_apis.txt").build();
 
 
 //        Option sourceSinkOpt = Option.builder("source_sink").argName("SourcesAndSinks.txt").required()
@@ -64,6 +71,8 @@ public class Config {
         options.addOption(input);
         options.addOption(sdk);
         options.addOption(processedFile);
+        options.addOption(sensitiveApi);
+        options.addOption(globalOutput);
 //        options.addOption(sourceSinkOpt);
 
         CommandLineParser parser = new DefaultParser();
@@ -101,6 +110,20 @@ public class Config {
                 File processingFile = new File(Config.filesToProcess);
                 if (!processingFile.exists()) {
                     throw new ParseException("Processed file does not exist.");
+                }
+            }
+            if (cmd.hasOption("sensitive_apis")) {
+                Config.sensitiveApiFile = cmd.getOptionValue("sensitive_apis");
+                File processingFile = new File(Config.filesToProcess);
+                if (!processingFile.exists()) {
+                    throw new ParseException("Sensitive Apis file does not exist.");
+                }
+            }
+            if (cmd.hasOption("file")) {
+                Config.outputGlobalFile = cmd.getOptionValue("output_global_apis");
+                File processingFile = new File(Config.filesToProcess);
+                if (!processingFile.exists()) {
+                    throw new ParseException("Output Global Apis file does not exist.");
                 }
             }
 
@@ -183,7 +206,7 @@ public class Config {
         Scene.v().setEntryPoints(Collections.singletonList(entryPoint));
 
         Util.LOGGER.info("initialization finished...");
-        Util.LOGGER.info(String.format("[input]%s, [output]%s [processedFile]%s", Config.codeDir, Config.outputDir,Config.filesToProcess));
+        Util.LOGGER.info(String.format("[input]%s, [output]%s [processedFile]%s [sensitive_api_file]%s [global_output_api_file]%s", Config.codeDir, Config.outputDir,Config.filesToProcess,Config.sensitiveApiFile,Config.outputGlobalFile));
     }
 
     public static PrintStream getResultPs() {
