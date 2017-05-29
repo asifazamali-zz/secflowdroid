@@ -1,3 +1,4 @@
+package Main.java;
 import org.apache.commons.cli.*;
 import org.apache.commons.cli.DefaultParser; 
 import soot.*;
@@ -45,6 +46,8 @@ public class Config {
     public static String outputGlobalFile;
     
     public static boolean parseArgs(String[] args) {
+//        for(String arg:args)
+//            System.out.println(arg);
         org.apache.commons.cli.Options options = new org.apache.commons.cli.Options();
         Option quiet = new Option("quiet", "be extra quiet");
         Option debug = new Option("debug", "print debug information");
@@ -90,8 +93,8 @@ public class Config {
             }
             if (cmd.hasOption('o')) {
                 Config.outputDir = cmd.getOptionValue('o');
-                File workingDir = new File(String.format("%s/APK_CG_%s/",
-                        Config.outputDir, Util.getTimeString()));
+                File workingDir = new File(String.format("%s/APK_CG/",
+                        Config.outputDir));
 
                 Config.outputDir = workingDir.getPath();
                 if (!workingDir.exists() && !workingDir.mkdirs()) {
@@ -114,14 +117,15 @@ public class Config {
             }
             if (cmd.hasOption("sensitive_apis")) {
                 Config.sensitiveApiFile = cmd.getOptionValue("sensitive_apis");
-                File processingFile = new File(Config.filesToProcess);
+                File processingFile = new File(Config.sensitiveApiFile);
                 if (!processingFile.exists()) {
                     throw new ParseException("Sensitive Apis file does not exist.");
                 }
             }
-            if (cmd.hasOption("file")) {
-                Config.outputGlobalFile = cmd.getOptionValue("output_global_apis");
-                File processingFile = new File(Config.filesToProcess);
+            if (cmd.hasOption("global_output_apis")) {
+                Config.outputGlobalFile = cmd.getOptionValue("global_output_apis");
+//                System.out.println(outputGlobalFile);
+                File processingFile = new File(Config.outputGlobalFile);
                 if (!processingFile.exists()) {
                     throw new ParseException("Output Global Apis file does not exist.");
                 }
