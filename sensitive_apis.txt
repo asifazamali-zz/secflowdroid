@@ -1,2 +1,4 @@
+Landroid/location/Location;
+Landroid/location/Location;->getLongitude
 Landroid/location/LocationManager;->getLastKnownLocation
 Landroid/location/LocationManager;->requestLocationUpdates

@@ -1,3 +1,6 @@
+
+import Main.java.Config;
+import Main.java.Util;
 import beaver.Scanner;
 import soot.*;
 import soot.SootClass;
@@ -32,6 +35,7 @@ public class Main {
     }
 
     public static void generateCGForAPK(String apkPath, String outputPath, String sdkPath,String processedFile,String sensitive_apis,String global_output_apis) {
+//        System.out.println(global_output_apis);
         String[] args = {"-i", apkPath, "-o", outputPath, "-sdk", sdkPath,"-file",processedFile,"-sensitive_apis",sensitive_apis,"-global_output_apis",global_output_apis};
         String appPackageName="";
         if (!Config.parseArgs(args)) {
@@ -48,7 +52,10 @@ public class Main {
         catch(Exception e){
             e.printStackTrace();
         }
-        Util.processing(apkPath);
+        
+           Util.processing(apkPath);
+        
+        
         /////////////////////////////////////////
 //        Chain<SootClass> classes = Scene.v().getClasses();
 //        Iterator<SootClass> sootClassIterator = classes.iterator();

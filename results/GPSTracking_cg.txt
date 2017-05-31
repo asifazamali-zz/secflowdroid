@@ -1,0 +1,501 @@
+flowAnalysis
+---------------------------------------------------
+ Lcom/example/asif/gpstracking/MainActivity;.onCreate.Lcom/example/asif/gpstracking/MainActivity;
+---------------------------------------------------
+$r0 := @this: com.example.asif.gpstracking.MainActivity
+$r1 := @parameter0: android.os.Bundle
+specialinvoke $r0.<android.support.v7.app.AppCompatActivity: void onCreate(android.os.Bundle)>($r1)
+virtualinvoke $r0.<com.example.asif.gpstracking.MainActivity: void setContentView(int)>(2130968603)
+$r3 = virtualinvoke $r0.<com.example.asif.gpstracking.MainActivity: android.view.View findViewById(int)>(2131427414)
+$r4 = (android.widget.Button) $r3
+$r0.<com.example.asif.gpstracking.MainActivity: android.widget.Button btnShowLocation> = $r4
+$r4 = $r0.<com.example.asif.gpstracking.MainActivity: android.widget.Button btnShowLocation>
+$r2 = new com.example.asif.gpstracking.MainActivity$1
+specialinvoke $r2.<com.example.asif.gpstracking.MainActivity$1: void <init>(com.example.asif.gpstracking.MainActivity)>($r0)
+virtualinvoke $r4.<android.widget.Button: void setOnClickListener(android.view.View$OnClickListener)>($r2)
+return
+---------------------------------------------------
+ Lcom/example/asif/gpstracking/GPSTracker;.getLocation.Landroid/util/Log;
+---------------------------------------------------
+$r0 := @this: com.example.asif.gpstracking.GPSTracker
+$r2 = $r0.<com.example.asif.gpstracking.GPSTracker: android.content.Context mcontext>
+$r3 = virtualinvoke $r2.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("location")
+$r4 = (android.location.LocationManager) $r3
+$r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager> = $r4
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$z0 = virtualinvoke $r4.<android.location.LocationManager: boolean isProviderEnabled(java.lang.String)>("gps")
+$r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled> = $z0
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$z0 = virtualinvoke $r4.<android.location.LocationManager: boolean isProviderEnabled(java.lang.String)>("network")
+$r0.<com.example.asif.gpstracking.GPSTracker: boolean isNetworkEnabled> = $z0
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+if $z0 != 0 goto $r0.<com.example.asif.gpstracking.GPSTracker: boolean canGetLocation> = 1
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isNetworkEnabled>
+if $z0 != 0 goto $r0.<com.example.asif.gpstracking.GPSTracker: boolean canGetLocation> = 1
+staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Network", "No Network provider is available")
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+if $z0 == 0 goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+if $r5 != null goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+virtualinvoke $r4.<android.location.LocationManager: void requestLocationUpdates(java.lang.String,long,float,android.location.LocationListener)>("gps", 60000L, 10.0F, $r0)
+staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GPS_ENABLED", "GPS_Enabled")
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+if $r4 == null goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$r5 = virtualinvoke $r4.<android.location.LocationManager: android.location.Location getLastKnownLocation(java.lang.String)>("gps")
+$r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location> = $r5
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+if $r5 == null goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLatitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double latitude> = $d0
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLongitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double longitude> = $d0
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+return $r5
+$r0.<com.example.asif.gpstracking.GPSTracker: boolean canGetLocation> = 1
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isNetworkEnabled>
+if $z0 == 0 goto staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Network", "Network")
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+virtualinvoke $r4.<android.location.LocationManager: void requestLocationUpdates(java.lang.String,long,float,android.location.LocationListener)>("network", 60000L, 10.0F, $r0)
+staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Network", "Network")
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+if $r4 == null goto $z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$r5 = virtualinvoke $r4.<android.location.LocationManager: android.location.Location getLastKnownLocation(java.lang.String)>("network")
+$r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location> = $r5
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+if $r5 == null goto $z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLatitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double latitude> = $d0
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLongitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double longitude> = $d0
+goto [?= $z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>]
+$r1 := @caughtexception
+r6 = (java.lang.Exception) $r1
+virtualinvoke r6.<java.lang.Exception: void printStackTrace()>()
+goto [?= $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>]
+---------------------------------------------------
+ Lcom/example/asif/gpstracking/GPSTracker;.getLocation.Landroid/location/LocationManager;
+---------------------------------------------------
+$r0 := @this: com.example.asif.gpstracking.GPSTracker
+$r2 = $r0.<com.example.asif.gpstracking.GPSTracker: android.content.Context mcontext>
+$r3 = virtualinvoke $r2.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("location")
+$r4 = (android.location.LocationManager) $r3
+$r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager> = $r4
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$z0 = virtualinvoke $r4.<android.location.LocationManager: boolean isProviderEnabled(java.lang.String)>("gps")
+$r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled> = $z0
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$z0 = virtualinvoke $r4.<android.location.LocationManager: boolean isProviderEnabled(java.lang.String)>("network")
+$r0.<com.example.asif.gpstracking.GPSTracker: boolean isNetworkEnabled> = $z0
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+if $z0 != 0 goto $r0.<com.example.asif.gpstracking.GPSTracker: boolean canGetLocation> = 1
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isNetworkEnabled>
+if $z0 != 0 goto $r0.<com.example.asif.gpstracking.GPSTracker: boolean canGetLocation> = 1
+staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Network", "No Network provider is available")
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+if $z0 == 0 goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+if $r5 != null goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+virtualinvoke $r4.<android.location.LocationManager: void requestLocationUpdates(java.lang.String,long,float,android.location.LocationListener)>("gps", 60000L, 10.0F, $r0)
+staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GPS_ENABLED", "GPS_Enabled")
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+if $r4 == null goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$r5 = virtualinvoke $r4.<android.location.LocationManager: android.location.Location getLastKnownLocation(java.lang.String)>("gps")
+$r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location> = $r5
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+if $r5 == null goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLatitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double latitude> = $d0
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLongitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double longitude> = $d0
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+return $r5
+$r0.<com.example.asif.gpstracking.GPSTracker: boolean canGetLocation> = 1
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isNetworkEnabled>
+if $z0 == 0 goto staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Network", "Network")
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+virtualinvoke $r4.<android.location.LocationManager: void requestLocationUpdates(java.lang.String,long,float,android.location.LocationListener)>("network", 60000L, 10.0F, $r0)
+staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Network", "Network")
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+if $r4 == null goto $z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$r5 = virtualinvoke $r4.<android.location.LocationManager: android.location.Location getLastKnownLocation(java.lang.String)>("network")
+$r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location> = $r5
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+if $r5 == null goto $z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLatitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double latitude> = $d0
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLongitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double longitude> = $d0
+goto [?= $z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>]
+$r1 := @caughtexception
+r6 = (java.lang.Exception) $r1
+virtualinvoke r6.<java.lang.Exception: void printStackTrace()>()
+goto [?= $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>]
+---------------------------------------------------
+ Lcom/example/asif/gpstracking/GPSTracker;.getLocation.Landroid/location/LocationManager;
+---------------------------------------------------
+$r0 := @this: com.example.asif.gpstracking.GPSTracker
+$r2 = $r0.<com.example.asif.gpstracking.GPSTracker: android.content.Context mcontext>
+$r3 = virtualinvoke $r2.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("location")
+$r4 = (android.location.LocationManager) $r3
+$r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager> = $r4
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$z0 = virtualinvoke $r4.<android.location.LocationManager: boolean isProviderEnabled(java.lang.String)>("gps")
+$r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled> = $z0
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$z0 = virtualinvoke $r4.<android.location.LocationManager: boolean isProviderEnabled(java.lang.String)>("network")
+$r0.<com.example.asif.gpstracking.GPSTracker: boolean isNetworkEnabled> = $z0
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+if $z0 != 0 goto $r0.<com.example.asif.gpstracking.GPSTracker: boolean canGetLocation> = 1
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isNetworkEnabled>
+if $z0 != 0 goto $r0.<com.example.asif.gpstracking.GPSTracker: boolean canGetLocation> = 1
+staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Network", "No Network provider is available")
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+if $z0 == 0 goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+if $r5 != null goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+virtualinvoke $r4.<android.location.LocationManager: void requestLocationUpdates(java.lang.String,long,float,android.location.LocationListener)>("gps", 60000L, 10.0F, $r0)
+staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GPS_ENABLED", "GPS_Enabled")
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+if $r4 == null goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$r5 = virtualinvoke $r4.<android.location.LocationManager: android.location.Location getLastKnownLocation(java.lang.String)>("gps")
+$r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location> = $r5
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+if $r5 == null goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLatitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double latitude> = $d0
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLongitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double longitude> = $d0
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+return $r5
+$r0.<com.example.asif.gpstracking.GPSTracker: boolean canGetLocation> = 1
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isNetworkEnabled>
+if $z0 == 0 goto staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Network", "Network")
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+virtualinvoke $r4.<android.location.LocationManager: void requestLocationUpdates(java.lang.String,long,float,android.location.LocationListener)>("network", 60000L, 10.0F, $r0)
+staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Network", "Network")
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+if $r4 == null goto $z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$r5 = virtualinvoke $r4.<android.location.LocationManager: android.location.Location getLastKnownLocation(java.lang.String)>("network")
+$r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location> = $r5
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+if $r5 == null goto $z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLatitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double latitude> = $d0
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLongitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double longitude> = $d0
+goto [?= $z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>]
+$r1 := @caughtexception
+r6 = (java.lang.Exception) $r1
+virtualinvoke r6.<java.lang.Exception: void printStackTrace()>()
+goto [?= $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>]
+---------------------------------------------------
+ Lcom/example/asif/gpstracking/GPSTracker;.getLocation.Landroid/util/Log;
+---------------------------------------------------
+$r0 := @this: com.example.asif.gpstracking.GPSTracker
+$r2 = $r0.<com.example.asif.gpstracking.GPSTracker: android.content.Context mcontext>
+$r3 = virtualinvoke $r2.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("location")
+$r4 = (android.location.LocationManager) $r3
+$r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager> = $r4
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$z0 = virtualinvoke $r4.<android.location.LocationManager: boolean isProviderEnabled(java.lang.String)>("gps")
+$r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled> = $z0
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$z0 = virtualinvoke $r4.<android.location.LocationManager: boolean isProviderEnabled(java.lang.String)>("network")
+$r0.<com.example.asif.gpstracking.GPSTracker: boolean isNetworkEnabled> = $z0
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+if $z0 != 0 goto $r0.<com.example.asif.gpstracking.GPSTracker: boolean canGetLocation> = 1
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isNetworkEnabled>
+if $z0 != 0 goto $r0.<com.example.asif.gpstracking.GPSTracker: boolean canGetLocation> = 1
+staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Network", "No Network provider is available")
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+if $z0 == 0 goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+if $r5 != null goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+virtualinvoke $r4.<android.location.LocationManager: void requestLocationUpdates(java.lang.String,long,float,android.location.LocationListener)>("gps", 60000L, 10.0F, $r0)
+staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GPS_ENABLED", "GPS_Enabled")
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+if $r4 == null goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$r5 = virtualinvoke $r4.<android.location.LocationManager: android.location.Location getLastKnownLocation(java.lang.String)>("gps")
+$r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location> = $r5
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+if $r5 == null goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLatitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double latitude> = $d0
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLongitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double longitude> = $d0
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+return $r5
+$r0.<com.example.asif.gpstracking.GPSTracker: boolean canGetLocation> = 1
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isNetworkEnabled>
+if $z0 == 0 goto staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Network", "Network")
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+virtualinvoke $r4.<android.location.LocationManager: void requestLocationUpdates(java.lang.String,long,float,android.location.LocationListener)>("network", 60000L, 10.0F, $r0)
+staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Network", "Network")
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+if $r4 == null goto $z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$r5 = virtualinvoke $r4.<android.location.LocationManager: android.location.Location getLastKnownLocation(java.lang.String)>("network")
+$r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location> = $r5
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+if $r5 == null goto $z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLatitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double latitude> = $d0
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLongitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double longitude> = $d0
+goto [?= $z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>]
+$r1 := @caughtexception
+r6 = (java.lang.Exception) $r1
+virtualinvoke r6.<java.lang.Exception: void printStackTrace()>()
+goto [?= $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>]
+---------------------------------------------------
+ Lcom/example/asif/gpstracking/GPSTracker;.getLocation.Landroid/location/LocationManager;
+---------------------------------------------------
+$r0 := @this: com.example.asif.gpstracking.GPSTracker
+$r2 = $r0.<com.example.asif.gpstracking.GPSTracker: android.content.Context mcontext>
+$r3 = virtualinvoke $r2.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("location")
+$r4 = (android.location.LocationManager) $r3
+$r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager> = $r4
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$z0 = virtualinvoke $r4.<android.location.LocationManager: boolean isProviderEnabled(java.lang.String)>("gps")
+$r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled> = $z0
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$z0 = virtualinvoke $r4.<android.location.LocationManager: boolean isProviderEnabled(java.lang.String)>("network")
+$r0.<com.example.asif.gpstracking.GPSTracker: boolean isNetworkEnabled> = $z0
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+if $z0 != 0 goto $r0.<com.example.asif.gpstracking.GPSTracker: boolean canGetLocation> = 1
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isNetworkEnabled>
+if $z0 != 0 goto $r0.<com.example.asif.gpstracking.GPSTracker: boolean canGetLocation> = 1
+staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Network", "No Network provider is available")
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+if $z0 == 0 goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+if $r5 != null goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+virtualinvoke $r4.<android.location.LocationManager: void requestLocationUpdates(java.lang.String,long,float,android.location.LocationListener)>("gps", 60000L, 10.0F, $r0)
+staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GPS_ENABLED", "GPS_Enabled")
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+if $r4 == null goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$r5 = virtualinvoke $r4.<android.location.LocationManager: android.location.Location getLastKnownLocation(java.lang.String)>("gps")
+$r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location> = $r5
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+if $r5 == null goto $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLatitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double latitude> = $d0
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLongitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double longitude> = $d0
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+return $r5
+$r0.<com.example.asif.gpstracking.GPSTracker: boolean canGetLocation> = 1
+$z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isNetworkEnabled>
+if $z0 == 0 goto staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Network", "Network")
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+virtualinvoke $r4.<android.location.LocationManager: void requestLocationUpdates(java.lang.String,long,float,android.location.LocationListener)>("network", 60000L, 10.0F, $r0)
+staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Network", "Network")
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+if $r4 == null goto $z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+$r4 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.LocationManager locationManager>
+$r5 = virtualinvoke $r4.<android.location.LocationManager: android.location.Location getLastKnownLocation(java.lang.String)>("network")
+$r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location> = $r5
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+if $r5 == null goto $z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLatitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double latitude> = $d0
+$r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+$d0 = virtualinvoke $r5.<android.location.Location: double getLongitude()>()
+$r0.<com.example.asif.gpstracking.GPSTracker: double longitude> = $d0
+goto [?= $z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean isGPSEnabled>]
+$r1 := @caughtexception
+r6 = (java.lang.Exception) $r1
+virtualinvoke r6.<java.lang.Exception: void printStackTrace()>()
+goto [?= $r5 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>]
+---------------------------------------------------
+ Lcom/example/asif/gpstracking/GPSTracker$1;.onClick.Landroid/content/Intent;
+---------------------------------------------------
+$r0 := @this: com.example.asif.gpstracking.GPSTracker
+$r0 null
+z0 = $r0.<com.example.asif.gpstracking.GPSTracker: boolean canGetLocation>
+z0 {owner=[com.example.asif.gpstracking], readers=[public, com.example.asif.gpstracking], writers=[com.example.asif.gpstracking]}
+return z0
+z0
+{owner=[com.example.asif.gpstracking], readers=[public, com.example.asif.gpstracking], writers=[com.example.asif.gpstracking]}
+$r0 := @this: com.example.asif.gpstracking.GPSTracker
+$r0 null
+$r1 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+-------------------------------------------
+com.example.asif.gpstracking.GPSTracker getLatitude $r0
+Changing lable com.example.asif.gpstracking.GPSTracker.getLatitude.$r0 label :null
+{owner=[com.example.asif.gpstracking], readers=[com.example.asif.gpstracking], writers=[public, com.example.asif.gpstracking]}
+com.example.asif.gpstracking.GPSTracker.getLatitude.$r0not updated
+Label not changed
+-------------------------------------------
+$r1 {owner=[com.example.asif.gpstracking], readers=[com.example.asif.gpstracking], writers=[com.example.asif.gpstracking]}
+if $r1 == null goto $d0 = $r0.<com.example.asif.gpstracking.GPSTracker: double latitude>
+$r1 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+com.example.asif.gpstracking.GPSTracker.getLatitude.$r1 created
+com.example.asif.gpstracking.GPSTracker.getLatitude.$r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location> created
+-------------------------------------------
+com.example.asif.gpstracking.GPSTracker getLatitude $r0
+Changing lable com.example.asif.gpstracking.GPSTracker.getLatitude.$r0 label :null
+{owner=[com.example.asif.gpstracking], readers=[com.example.asif.gpstracking], writers=[public, com.example.asif.gpstracking]}
+com.example.asif.gpstracking.GPSTracker.getLatitude.$r0not updated
+Label not changed
+-------------------------------------------
+$r1 {owner=[com.example.asif.gpstracking], readers=[com.example.asif.gpstracking], writers=[com.example.asif.gpstracking]}
+$d0 = virtualinvoke $r1.<android.location.Location: double getLatitude()>()
+Class :android.location.Location method :getLatitude
+arguments
+$d0 {owner=[com.example.asif.gpstracking], readers=[com.example.asif.gpstracking], writers=[public, com.example.asif.gpstracking]}
+$r0.<com.example.asif.gpstracking.GPSTracker: double latitude> = $d0
+$d0 = $r0.<com.example.asif.gpstracking.GPSTracker: double latitude>
+com.example.asif.gpstracking.GPSTracker.getLatitude.$d0 created
+$d0 {owner=[com.example.asif.gpstracking], readers=[com.example.asif.gpstracking], writers=[public, com.example.asif.gpstracking]}
+return $d0
+$d0
+{owner=[com.example.asif.gpstracking], readers=[com.example.asif.gpstracking], writers=[public, com.example.asif.gpstracking]}
+$r0 := @this: com.example.asif.gpstracking.GPSTracker
+$r0 null
+$r1 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+-------------------------------------------
+com.example.asif.gpstracking.GPSTracker getLongitude $r0
+Changing lable com.example.asif.gpstracking.GPSTracker.getLongitude.$r0 label :null
+{owner=[com.example.asif.gpstracking], readers=[com.example.asif.gpstracking], writers=[public, com.example.asif.gpstracking]}
+com.example.asif.gpstracking.GPSTracker.getLongitude.$r0not updated
+Label not changed
+-------------------------------------------
+$r1 {owner=[com.example.asif.gpstracking], readers=[com.example.asif.gpstracking], writers=[public, com.example.asif.gpstracking]}
+if $r1 == null goto $d0 = $r0.<com.example.asif.gpstracking.GPSTracker: double longitude>
+$r1 = $r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location>
+com.example.asif.gpstracking.GPSTracker.getLongitude.$r1 created
+com.example.asif.gpstracking.GPSTracker.getLongitude.$r0.<com.example.asif.gpstracking.GPSTracker: android.location.Location location> created
+-------------------------------------------
+com.example.asif.gpstracking.GPSTracker getLongitude $r0
+Changing lable com.example.asif.gpstracking.GPSTracker.getLongitude.$r0 label :null
+{owner=[com.example.asif.gpstracking], readers=[com.example.asif.gpstracking], writers=[public, com.example.asif.gpstracking]}
+com.example.asif.gpstracking.GPSTracker.getLongitude.$r0not updated
+Label not changed
+-------------------------------------------
+$r1 {owner=[com.example.asif.gpstracking], readers=[com.example.asif.gpstracking], writers=[public, com.example.asif.gpstracking]}
+$d0 = virtualinvoke $r1.<android.location.Location: double getLongitude()>()
+Class :android.location.Location method :getLongitude
+arguments
+$r1
+$d0 {owner=[com.example.asif.gpstracking], readers=[com.example.asif.gpstracking], writers=[public, com.example.asif.gpstracking]}
+$r0.<com.example.asif.gpstracking.GPSTracker: double longitude> = $d0
+$d0 = $r0.<com.example.asif.gpstracking.GPSTracker: double longitude>
+com.example.asif.gpstracking.GPSTracker.getLongitude.$d0 created
+$d0 {owner=[com.example.asif.gpstracking], readers=[com.example.asif.gpstracking], writers=[public, com.example.asif.gpstracking]}
+return $d0
+$d0
+{owner=[com.example.asif.gpstracking], readers=[com.example.asif.gpstracking], writers=[public, com.example.asif.gpstracking]}
+***************** misuse *************
+subLabel {owner=[com.example.asif.gpstracking], readers=[com.example.asif.gpstracking], writers=[public, com.example.asif.gpstracking]} tries to read {owner=[public], readers=[public, com.example.asif.gpstracking], writers=[public, com.example.asif.gpstracking]}
+***************** misuse *************
+$r0 := @this: com.example.asif.gpstracking.MainActivity$1
+$r1 := @parameter0: android.view.View
+$r3 = $r0.<com.example.asif.gpstracking.MainActivity$1: com.example.asif.gpstracking.MainActivity this$0>
+$r4 = new com.example.asif.gpstracking.GPSTracker
+$r2 = $r0.<com.example.asif.gpstracking.MainActivity$1: com.example.asif.gpstracking.MainActivity this$0>
+specialinvoke $r4.<com.example.asif.gpstracking.GPSTracker: void <init>(android.content.Context)>($r2)
+$r3.<com.example.asif.gpstracking.MainActivity: com.example.asif.gpstracking.GPSTracker gps> = $r4
+$r2 = $r0.<com.example.asif.gpstracking.MainActivity$1: com.example.asif.gpstracking.MainActivity this$0>
+$r4 = $r2.<com.example.asif.gpstracking.MainActivity: com.example.asif.gpstracking.GPSTracker gps>
+$z0 = virtualinvoke $r4.<com.example.asif.gpstracking.GPSTracker: boolean canGetLocation()>()
+if $z0 == 0 goto $r2 = $r0.<com.example.asif.gpstracking.MainActivity$1: com.example.asif.gpstracking.MainActivity this$0>
+$r2 = $r0.<com.example.asif.gpstracking.MainActivity$1: com.example.asif.gpstracking.MainActivity this$0>
+$r4 = $r2.<com.example.asif.gpstracking.MainActivity: com.example.asif.gpstracking.GPSTracker gps>
+$d0 = virtualinvoke $r4.<com.example.asif.gpstracking.GPSTracker: double getLatitude()>()
+$r2 = $r0.<com.example.asif.gpstracking.MainActivity$1: com.example.asif.gpstracking.MainActivity this$0>
+$r4 = $r2.<com.example.asif.gpstracking.MainActivity: com.example.asif.gpstracking.GPSTracker gps>
+$d1 = virtualinvoke $r4.<com.example.asif.gpstracking.GPSTracker: double getLongitude()>()
+$r5 = new java.lang.StringBuilder
+specialinvoke $r5.<java.lang.StringBuilder: void <init>()>()
+$r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Your Location is- \nLat: ")
+$r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d0)
+$r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nLong: ")
+$r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d1)
+$r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>()
+$r2 = $r0.<com.example.asif.gpstracking.MainActivity$1: com.example.asif.gpstracking.MainActivity this$0>
+$r7 = virtualinvoke $r2.<com.example.asif.gpstracking.MainActivity: android.content.Context getApplicationContext()>()
+$r8 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,java.lang.CharSequence,int)>($r7, $r6, 1)
+virtualinvoke $r8.<android.widget.Toast: void show()>()
+return
+$r2 = $r0.<com.example.asif.gpstracking.MainActivity$1: com.example.asif.gpstracking.MainActivity this$0>
+$r4 = $r2.<com.example.asif.gpstracking.MainActivity: com.example.asif.gpstracking.GPSTracker gps>
+virtualinvoke $r4.<com.example.asif.gpstracking.GPSTracker: void showSettingsAlert()>()
+return
+---------------------------------------------------
+ Lcom/example/asif/recieveintent/MainActivity;.onCreate.Landroid/util/Log;
+---------------------------------------------------
+$r0 := @this: com.example.asif.gpstracking.MainActivity
+$r1 := @parameter0: android.os.Bundle
+specialinvoke $r0.<android.support.v7.app.AppCompatActivity: void onCreate(android.os.Bundle)>($r1)
+virtualinvoke $r0.<com.example.asif.gpstracking.MainActivity: void setContentView(int)>(2130968603)
+$r3 = virtualinvoke $r0.<com.example.asif.gpstracking.MainActivity: android.view.View findViewById(int)>(2131427414)
+$r4 = (android.widget.Button) $r3
+$r0.<com.example.asif.gpstracking.MainActivity: android.widget.Button btnShowLocation> = $r4
+$r4 = $r0.<com.example.asif.gpstracking.MainActivity: android.widget.Button btnShowLocation>
+$r2 = new com.example.asif.gpstracking.MainActivity$1
+specialinvoke $r2.<com.example.asif.gpstracking.MainActivity$1: void <init>(com.example.asif.gpstracking.MainActivity)>($r0)
+virtualinvoke $r4.<android.widget.Button: void setOnClickListener(android.view.View$OnClickListener)>($r2)
+return
+---------------------------------------------------
+ Lcom/example/asif/recieveintent/MainActivity;.onCreate.Landroid/util/Log;
+---------------------------------------------------
+$r0 := @this: com.example.asif.gpstracking.MainActivity
+$r1 := @parameter0: android.os.Bundle
+specialinvoke $r0.<android.support.v7.app.AppCompatActivity: void onCreate(android.os.Bundle)>($r1)
+virtualinvoke $r0.<com.example.asif.gpstracking.MainActivity: void setContentView(int)>(2130968603)
+$r3 = virtualinvoke $r0.<com.example.asif.gpstracking.MainActivity: android.view.View findViewById(int)>(2131427414)
+$r4 = (android.widget.Button) $r3
+$r0.<com.example.asif.gpstracking.MainActivity: android.widget.Button btnShowLocation> = $r4
+$r4 = $r0.<com.example.asif.gpstracking.MainActivity: android.widget.Button btnShowLocation>
+$r2 = new com.example.asif.gpstracking.MainActivity$1
+specialinvoke $r2.<com.example.asif.gpstracking.MainActivity$1: void <init>(com.example.asif.gpstracking.MainActivity)>($r0)
+virtualinvoke $r4.<android.widget.Button: void setOnClickListener(android.view.View$OnClickListener)>($r2)
+return
+---------------------------------------------------
+ Lcom/example/asif/recieveintent/MainActivity;.onCreate.Landroid/widget/Toast;
+---------------------------------------------------
+$r0 := @this: com.example.asif.gpstracking.MainActivity
+$r1 := @parameter0: android.os.Bundle
+specialinvoke $r0.<android.support.v7.app.AppCompatActivity: void onCreate(android.os.Bundle)>($r1)
+virtualinvoke $r0.<com.example.asif.gpstracking.MainActivity: void setContentView(int)>(2130968603)
+$r3 = virtualinvoke $r0.<com.example.asif.gpstracking.MainActivity: android.view.View findViewById(int)>(2131427414)
+$r4 = (android.widget.Button) $r3
+$r0.<com.example.asif.gpstracking.MainActivity: android.widget.Button btnShowLocation> = $r4
+$r4 = $r0.<com.example.asif.gpstracking.MainActivity: android.widget.Button btnShowLocation>
+$r2 = new com.example.asif.gpstracking.MainActivity$1
+specialinvoke $r2.<com.example.asif.gpstracking.MainActivity$1: void <init>(com.example.asif.gpstracking.MainActivity)>($r0)
+virtualinvoke $r4.<android.widget.Button: void setOnClickListener(android.view.View$OnClickListener)>($r2)
+return

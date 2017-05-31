@@ -1,1 +1,2 @@
 Landroid/util/Log;->d
+Landroid/widget/Toast;->makeText
