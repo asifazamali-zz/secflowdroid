@@ -20,6 +20,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static callgraph.ProcessLocalMethod.createObjId;
+
 public class Util {
     public static final Logger LOGGER = Logger.getLogger("APK_CG");
     public static final String UNKNOWN = "<unknown>";
@@ -66,17 +68,23 @@ public class Util {
         try{
             BufferedReader bufferedReader = new BufferedReader(new FileReader(Config.filesToProcess));
             String line = bufferedReader.readLine();
-            while(line!=null){
+            HashSet<String> hashSet = new HashSet<>();
+            while(line!=null)
+            {
                 String[] parts = line.split(":");
                 System.out.println(line);
-                System.out.println("parts:"+parts[1]);
+                System.out.println("parts:" + parts[1]);
                 String[] partsSplit = parts[1].split("->");
-                System.out.println("partSplit:"+partsSplit[0]+" "+partsSplit[1]+" "+partsSplit[2]+partsSplit[3]);
-                classes.add(partsSplit[0]);
-                System.out.println(partsSplit[0]);
-                methods.add(trimMethods(partsSplit[1]));
-                apis.add(partsSplit[2]);
-                apiMethod.add(trimApiMethod(partsSplit[3]));
+                String key = "partSplit:" + partsSplit[0] + " " + partsSplit[1];
+                System.out.println("partSplit:" + partsSplit[0] + " " + partsSplit[1] + " " + partsSplit[2] + partsSplit[3]);
+                if (!hashSet.contains(key)){
+                    classes.add(partsSplit[0]);
+                    System.out.println(partsSplit[0]);
+                    methods.add(trimMethods(partsSplit[1]));
+                    apis.add(partsSplit[2]);
+                    apiMethod.add(trimApiMethod(partsSplit[3]));
+                    hashSet.add(key);
+                }
                 line = bufferedReader.readLine();
             }
         }
@@ -174,35 +182,35 @@ public class Util {
                 dict_class_method.put(sootClass,methodList);
             }    
         }
-//        getJimpleFile();
+//        getJimpleFile();   <-----------gives only jimple file
 
-       flowControl();
+       flowControl();        //<----------- labeling
     }
-//    public static void getJimpleFile()
-//    {
-//        for (int i = 0; i < classes.size(); i++)
-//        {
-//            ps.println("---------------------------------------------------");
-//            ps.println(classes.get(i) + "." + methods.get(i) + "." + apis.get(i));
-//            ps.println("---------------------------------------------------");
-//
-//            SootMethod sootMethod = (SootMethod) dict_methodName_method.get(methods.get(i));
-//
-//            if(sootMethod != null)
-//            {
-//                Body b = sootMethod.retrieveActiveBody();
-//                UnitGraph unitGraph = new ExceptionalUnitGraph(b);
-//                Iterator itr = unitGraph.iterator();
-//                while (itr.hasNext())
-//                {
-//                    Unit u = (Unit) itr.next();
-//                    ps.println(u.toString());
-//                    //                ps.print("Out : ");
-//                    //                ps.println(OUT.toString() + "\n");
-//                }
-//            }
-//        }
-//    }
+    public static void getJimpleFile()
+    {
+        for (int i = 0; i < classes.size(); i++)
+        {
+            ps.println("---------------------------------------------------");
+            ps.println(classes.get(i) + "." + methods.get(i) + "." + apis.get(i));
+            ps.println("---------------------------------------------------");
+
+            SootMethod sootMethod = (SootMethod) dict_methodName_method.get(methods.get(i));
+
+            if(sootMethod != null)
+            {
+                Body b = sootMethod.retrieveActiveBody();
+                UnitGraph unitGraph = new ExceptionalUnitGraph(b);
+                Iterator itr = unitGraph.iterator();
+                while (itr.hasNext())
+                {
+                    Unit u = (Unit) itr.next();
+                    ps.println(u.toString());
+                    //                ps.print("Out : ");
+                    //                ps.println(OUT.toString() + "\n");
+                }
+            }
+        }
+    }
     public static void flowControl(){
         Util.ps.println("flowAnalysis");
         
@@ -211,19 +219,21 @@ public class Util {
             ps.println("---------------------------------------------------");
             ps.println(classes.get(i)+"."+methods.get(i)+"."+apis.get(i));
             ps.println("---------------------------------------------------");
-
+            System.out.println("---------------------------------------------------");
+            System.out.println(classes.get(i)+"."+methods.get(i)+"."+apis.get(i));
+            System.out.println("---------------------------------------------------");
             SootMethod sootMethod = (SootMethod) dict_methodName_method.get(methods.get(i));
             if(sootMethod != null)
             {
                 Body b = sootMethod.retrieveActiveBody();
                 UnitGraph unitGraph = new ExceptionalUnitGraph(b);
                 InformationFlowAnalysis informationFlowAnalysis = new InformationFlowAnalysis(unitGraph, labelManager, subLabel, convertClass(classes.get(i)), methods.get(i));
-                Iterator itr = unitGraph.iterator();
-                while (itr.hasNext())
-                {
-                    Unit u = (Unit) itr.next();
-                    ps.println(u.toString());
-                }
+//                Iterator itr = unitGraph.iterator();
+//                while (itr.hasNext())
+//                {
+//                    Unit u = (Unit) itr.next();
+//                    ps.println(u.toString());
+//                }
             }
         }
     }
@@ -246,7 +256,7 @@ public class Util {
         
         subLabel = makeRWLabel.makeSubLabel(subOwner,readers); // subjectLevel(packageName,packageName,packageName)
         labelManager = new LabelManager();
-        labelManager.saveLabel("S1",subLabel,"subClass","subMethod");
+        labelManager.saveLabel("S1",subLabel);
 
     }
     public static String trimMethods(String str){
@@ -254,6 +264,10 @@ public class Util {
     }
     public static String trimApiMethod(String str){
        return str.split("\\(",2)[0]; 
+    }
+    public static void printLabel(String var, String className, String methodName){
+//        String obj_id = createObjId(var,className,methodName);
+        System.out.println(var+" "+labelManager.getLabel(var,className,methodName));
     }
     
 }

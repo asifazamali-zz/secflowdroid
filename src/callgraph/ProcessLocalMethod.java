@@ -82,15 +82,16 @@ public class ProcessLocalMethod
           if (ro instanceof Local)
           {
             if(InformationFlowAnalysis.checkAndDef(lo.toString(),className,methodName))
-              Util.ps.println(createObjId(className,methodName,lo.toString())+" created");
+              Util.ps.println(createObjId(lo.toString(),className,methodName)+" created");
             if(InformationFlowAnalysis.checkAndDef(ro.toString(),className,methodName))
-              Util.ps.println(createObjId(className,methodName,ro.toString())+" created");
+              Util.ps.println(createObjId(ro.toString(),className,methodName)+" created");
 
             // lo <- ro checking and changing labels of subjects
 
             subLabel = new RWLabel().checkRead(subLabel, labelManager.getLabel(ro.toString(),className,methodName),labelManager);
-            // update label of lo 
-            labelManager.updateLabel(lo.toString(),labelManager.getLabel(ro.toString(),className,methodName),className,methodName);
+            // update label of lo
+            String obj_id = createObjId(lo.toString(),className,methodName);
+            labelManager.updateLabel(obj_id,labelManager.getLabel(ro.toString(),className,methodName));
           } 
           else if (ro instanceof InterfaceInvokeExpr){
             Util.ps.println("interfaceInvoke ");// handle it later
@@ -99,9 +100,9 @@ public class ProcessLocalMethod
           else if (ro instanceof InvokeExpr)
           {
             if(InformationFlowAnalysis.checkAndDef(lo.toString(),className,methodName))
-              Util.ps.println(createObjId(className,methodName,lo.toString())+" created");
+              Util.ps.println(createObjId(lo.toString(),className,methodName)+" created");
             if(InformationFlowAnalysis.checkAndDef(ro.toString(),className,methodName))
-              Util.ps.println(createObjId(className,methodName,ro.toString())+" created");
+              Util.ps.println(createObjId(ro.toString(),className,methodName)+" created");
 
             InvokeExpr invokeExpr = (InvokeExpr) ro;
             sootMethod = invokeExpr.getMethod();
@@ -123,7 +124,8 @@ public class ProcessLocalMethod
 //              System.out.println("inside sensitive method");
               Dictionary privateLabel =  makeRWLabel.createPrivateLabel();
               subLabel = new RWLabel().checkRead(subLabel,privateLabel,labelManager);
-              labelManager.updateLabel(ro.getUseBoxes().get(0).getValue().toString(),subLabel,className,methodName);
+              String obj_id = createObjId(ro.getUseBoxes().get(0).getValue().toString(),className,methodName);
+              labelManager.updateLabel(obj_id,subLabel);
               Util.ps.println(ro.getUseBoxes().get(0).getValue());
             }
               
@@ -136,28 +138,30 @@ public class ProcessLocalMethod
             }
 //            System.out.println("");
 //            System.out.println("After local fnction call "+subLabel);
-            labelManager.updateLabel(lo.toString(),subLabel,className,methodName);
+            String obj_id = createObjId(lo.toString(),className,methodName);
+            labelManager.updateLabel(obj_id,subLabel);
           }
           else if(ro instanceof FieldRef){
             if(InformationFlowAnalysis.checkAndDef(lo.toString(),className,methodName))
-              Util.ps.println(createObjId(className,methodName,lo.toString())+" created");
+              Util.ps.println(createObjId(lo.toString(),className,methodName)+" created");
             if(InformationFlowAnalysis.checkAndDef(ro.toString(),className,methodName))
-              Util.ps.println(createObjId(className,methodName,ro.toString())+" created");
+              Util.ps.println(createObjId(ro.toString(),className,methodName)+" created");
 
             SootField sootField = ((FieldRef)ro).getField();
             String subSignatureType = sootField.getSubSignature().split(" ")[0];
             if(Util.sensitive_class.contains(subSignatureType)){
               Util.ps.println("-------------------------------------------");
               String var =ro.getUseBoxes().get(0).getValue().toString();
-              String obj_id = createObjId(className,methodName,var);
+              String obj_id = createObjId(var,className,methodName);
               Util.ps.println(className+" "+methodName+" "+var);
               Util.ps.println("Changing lable "+obj_id+" label :"+Util.labelManager.getLabel(var,className,methodName));
               Dictionary privateLabel =  makeRWLabel.createPrivateLabel();
               Util.ps.println(privateLabel);
               subLabel = rwLabel.checkRead(subLabel,privateLabel,labelManager);
-              if(Util.labelManager.updateLabel(var,privateLabel,className,methodName)){
+              if(Util.labelManager.updateLabel(obj_id,privateLabel)){
                 Util.ps.println("Changed Label "+Util.labelManager.getLabel(var,className,methodName));
-                labelManager.updateLabel(lo.toString(),subLabel,className,methodName);
+                String lo_obj_id = createObjId(lo.toString(),className,methodName);
+                labelManager.updateLabel(lo_obj_id,subLabel);
               }
               else{
                 Util.ps.println("Label not changed");
@@ -189,7 +193,7 @@ public class ProcessLocalMethod
     }
     return ret;
   }
-  public static String createObjId(String className,String methodName,String obj_id){
+  public static String createObjId(String obj_id,String className,String methodName){
     return className+"."+methodName+"."+obj_id;
   }
 }

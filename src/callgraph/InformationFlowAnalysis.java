@@ -6,6 +6,7 @@ import ifc.LabelManager;
 import ifc.RWLabel;
 import jas.Label;
 import polyglot.ast.If;
+import polyglot.ast.Return;
 import soot.*;
 import soot.Body;
 import soot.JastAddJ.*;
@@ -24,6 +25,8 @@ import soot.util.Chain;
 import javax.swing.*;
 import java.util.*;
 import java.util.List;
+
+import static Main.java.Util.ps;
 
 /**
  * Created by asif on 5/27/17.
@@ -54,6 +57,7 @@ public class InformationFlowAnalysis
   public        String       className;
   public        String       mthdName;
   public static StatementHanding statementHanding;
+  public static HashSet<Local> refLocals;
   public InformationFlowAnalysis(UnitGraph g, LabelManager lblManager, Dictionary subLbl, String className, String mthdName)
   {
 //    super(g);
@@ -64,7 +68,7 @@ public class InformationFlowAnalysis
     this.mthdName = mthdName;
     unitToGenerateSet = new HashMap();
     Body b = g.getBody();
-    List refLocals = new LinkedList();
+    refLocals = new HashSet<>();
 //    emptySet = new ArraySparseSet();
 //    fullSet = new ArraySparseSet();
     Iterator localIt = b.getLocals().iterator();
@@ -74,7 +78,8 @@ public class InformationFlowAnalysis
     {
       Local l = (Local) localIt.next();
       System.out.println(l.getName());
-      String obj_id = l.getName();
+//      String obj_id = l.getName();
+      refLocals.add(l);
 //      if (l.getType() instanceof RefLikeType) //RefLikeType --> null in java
 //        fullSet.add(l);
     }
@@ -126,7 +131,7 @@ public class InformationFlowAnalysis
     while(itr.hasNext())
     {
       Unit s = (Unit) itr.next();
-      System.out.println(s);
+//      System.out.println(s);
       handleStatement(itr, s);
     }
   }
@@ -352,35 +357,36 @@ public class InformationFlowAnalysis
   }
 
   public static boolean handleStatement(Iterator itr, Unit s){
+    ps.println(s);
+    System.out.println(s);
+//    System.out.println("handle statement called");
     if (s instanceof DefinitionStmt)
     {
-
       DefinitionStmt as = (DefinitionStmt) s;
       Value lo = as.getLeftOp();
       Value ro = as.getRightOp();
-      //      System.out.println("Definition Stmt "+as);
+//            System.out.println("Definition Stmt "+as);
       //      System.out.println("Value "+ro);
       // extract cast argument
       if (s instanceof IdentityStmt)
       {
-//        System.out.println("Identity Statement");
+        System.out.println("Identity Statement");
         statementHanding.handleIdentityStmt(s);
       }
       if (s instanceof AssignStmt)
       {
-//        System.out.println("Assignment Statment");
+        System.out.println("Assignment Statment");
         statementHanding.handleAssignmentStmt(s);
       }
 
     }
-
-    if (s instanceof IfStmt)
+    else if (s instanceof IfStmt)
     {
 //      System.out.println("If statement ");
 //      System.out.println(s);
       ValueBox valueBox = ((IfStmt) s).getConditionBox();
 //      System.out.println("getCondition " + ((IfStmt) s).getCondition());
-
+//
 //      System.out.println("getCondition " + valueBox.getValue());
       if(((IfStmt) s).getTarget() instanceof ReturnVoidStmt)
         statementHanding.handleIfStatement(itr,s);
@@ -389,6 +395,25 @@ public class InformationFlowAnalysis
 //      System.out.println("getTarget " + ((IfStmt) s).getTarget());
 //      System.out.println("TargetBox " + ((IfStmt) s).getTargetBox().getUnit());
     }
+    else if (s instanceof ReturnVoidStmt){
+      System.out.println("returnvoid"+s);
+      statementHanding.handleReturnVoid(s);
+    }
+    else if(s instanceof Return){
+      System.out.println("return value");
+      statementHanding.handleReturn(s);
+    }
+    else if(s instanceof InvokeStmt){
+      statementHanding.handleOnlyInvokeStmt(((InvokeStmt) s).getInvokeExpr());
+//      System.out.println("invokeStmt"+s);
+//      InvokeExpr invokeExpr = ((InvokeStmt) s).getInvokeExpr();
+      
+    }
+    if(s instanceof InterfaceInvokeExpr){
+      System.out.println("invokeExper"+s);
+    }
+    else
+      System.out.println(s);
     return false;
   }
 

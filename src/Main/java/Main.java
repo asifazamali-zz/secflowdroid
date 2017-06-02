@@ -25,10 +25,10 @@ public class Main {
 
         generateCGForAPK(
                 // TODO @Yuxuan, replace this with your APK path
-                "/home/asif/MTP/Experiments/apimonitor/APIMonitor-beta/apks_old/GPSTracking.apk",
+                "/home/asif/MTP/Experiments/apimonitor/APIMonitor-beta/apks_old/FileInputOutput.apk",
                 "output",
                 "android.jar",
-                "/home/asif/MTP/Experiments/apimonitor/APIMonitor-beta/logs/GPSTracking.log",
+                "/home/asif/MTP/Experiments/apimonitor/APIMonitor-beta/logs/FileInputOutput.log",
                 "sensitive_apis.txt",
                 "global_output_apis.txt");
 

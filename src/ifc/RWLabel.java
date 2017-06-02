@@ -7,6 +7,8 @@ import fj.Hash;
 
 import java.util.*;
 
+import static callgraph.ProcessLocalMethod.createObjId;
+
 /**
  * Created by asif on 5/26/17.
  */
@@ -18,14 +20,11 @@ public class RWLabel
   {
 
     Dictionary objectLabel = new Hashtable();
-    obj_id = className + "." + methodName + "." + obj_id;
-//    Set<String> hashSet = new HashSet<>();
-//    hashSet.add(obj_id);
-//    objectLabel.put(className+"."+methodName+"."+obj_id,hashSet);
+    obj_id = createObjId(obj_id,className,methodName);
     objectLabel.put("owner", sublabel.get("owner"));
     objectLabel.put("readers", sublabel.get("readers"));
     objectLabel.put("writers", sublabel.get("writers"));
-    if (labelManager.saveLabel(obj_id, objectLabel, className, methodName))
+    if (labelManager.saveLabel(obj_id, objectLabel))
       return objectLabel;
     return null;
   }
@@ -44,6 +43,9 @@ public class RWLabel
       Util.ps.println("***************** misuse *************");
       Util.ps.println("subLabel "+subLabel+" tries to read "+objLabel);
       Util.ps.println("***************** misuse *************");
+      System.out.println("***************** misuse *************");
+      System.out.println("subLabel "+subLabel+" tries to read "+objLabel);
+      System.out.println("***************** misuse *************");
       ret = subLabel;
     }
     return ret;

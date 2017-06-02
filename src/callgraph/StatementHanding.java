@@ -2,6 +2,7 @@ package callgraph;
 
 import Main.java.MakeRWLabel;
 import Main.java.Util;
+import fj.data.State;
 import ifc.LabelManager;
 import ifc.RWLabel;
 import polyglot.ast.If;
@@ -16,9 +17,12 @@ import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.List;
 
-import static callgraph.InformationFlowAnalysis.checkAndDef;
+import static Main.java.Util.*;
+import static callgraph.InformationFlowAnalysis.*;
 import static callgraph.InformationFlowAnalysis.labelManager;
+import static callgraph.InformationFlowAnalysis.makeRWLabel;
 import static callgraph.InformationFlowAnalysis.subLabel;
+import static callgraph.ProcessLocalMethod.createObjId;
 
 /**
  * Created by asif on 5/31/17.
@@ -40,10 +44,30 @@ public class StatementHanding
 
     subLabel = new RWLabel().checkRead(subLabel, labelManager.getLabel(ro.toString(), className, mthdName), labelManager);
     // update label of lo 
-    labelManager.updateLabel(lo.toString(), labelManager.getLabel(ro.toString(), className, mthdName), className, mthdName);
+    String obj_id = createObjId(lo.toString(),className,mthdName);
+    labelManager.updateLabel(obj_id, labelManager.getLabel(ro.toString(), className, mthdName));
     return true;
   }
+  public boolean handleOnlyInvokeStmt(InvokeExpr invokeExpr){
+    if(invokeExpr instanceof InterfaceInvokeExpr){
+      Value base = ((InterfaceInvokeExpr) invokeExpr).getBase();
+//      System.out.println("interface base"+ base);
+      List args = invokeExpr.getArgs();
+      Iterator iterator = args.iterator();
+      while(iterator.hasNext()){
+        Value arg = (Value) iterator.next();
+//        System.out.println("arg: "+arg);
+        if(refLocals.contains(arg.toString())){
+          checkAndDef(arg.toString(),className,mthdName);
+        }
+        printLabel(arg.toString(),className,mthdName);
+      }
+//      String obj_id = createObjId(base.toString(),className,mthdName);
 
+      printLabel(base.toString(),className,mthdName);
+    }
+    return false;
+  }
   public boolean handleInterfaceInvokeExpr(Value lo, Value ro)
   {
     System.out.println("handling Invoke Expr");
@@ -62,7 +86,7 @@ public class StatementHanding
 
     String cName = sootMethod.getDeclaringClass().getName();
     System.out.println("Class :" + cName + " method :" + method);
-    System.out.println("arguments");
+    
     if (cName.contains(Util.appPackageName))
     {
       System.out.println("Parse Method: " + method);
@@ -80,16 +104,21 @@ public class StatementHanding
       Dictionary publicLabel = new MakeRWLabel().createPublicLabel();
       new RWLabel().checkRead(subLabel, publicLabel, labelManager);
     }
+    System.out.println("arguments");
     for (Value v : args)
     {
       System.out.print(v);
       if (labelManager.getLabel(v.toString(), className, mthdName) != null)
       {
-        labelManager.updateLabel(lo.toString(), labelManager.getLabel(v.toString(), className, mthdName), className, mthdName);
+        String obj_id = createObjId(lo.toString(),className,mthdName);
+        labelManager.updateLabel(obj_id, labelManager.getLabel(v.toString(), className, mthdName));
       }
     }
     if (ret != null)
-      labelManager.updateLabel(lo.toString(), ret, className, mthdName);
+    {
+      String obj_id = createObjId(lo.toString(),className,mthdName);
+      labelManager.updateLabel(obj_id, ret);
+    }
     return true;
   }
 
@@ -119,22 +148,66 @@ public class StatementHanding
     Value ro = ((DefinitionStmt) s).getRightOp();
     if (lo instanceof Local)
     {
-      if (ro instanceof Local)
-      {
-        System.out.println("Check for subject label and assign sublabel to lo");
-
-        handleLocalStatement(lo,ro);
-      } else if (ro instanceof InterfaceInvokeExpr)
-      {
-        handleInterfaceInvokeExpr(lo,ro);
-      } else if (ro instanceof InvokeExpr)
-      {
-        handleInvokeExpr(lo,ro);
-      }
-
+      handleRightOperand(lo,ro);
+      
       System.out.println(lo.toString() + " " + labelManager.getLabel(lo.toString(), className, mthdName));
     }
+    else if(lo instanceof ArrayRef){
+//      System.out.println("Array Ref Base "+((ArrayRef) lo).getBase());
+      Value leftOp = ((ArrayRef) lo).getBase();
+      handleRightOperand(leftOp,ro);
+      System.out.println(leftOp.toString() + " " + labelManager.getLabel(leftOp.toString(), className, mthdName));
+    }
 
+    return true;
+  }
+  public boolean handleRightOperand(Value lo, Value ro)
+  {
+    if (ro instanceof Local)
+    {
+      System.out.println("Check for subject label and assign sublabel to lo");
+
+      handleLocalStatement(lo, ro);
+    } else if (ro instanceof InterfaceInvokeExpr)
+    {
+      System.out.println("Assignment + Interfaceinvoke");
+      handleInterfaceInvokeExpr(lo, ro);
+    } else if (ro instanceof InvokeExpr)
+    {
+      System.out.println("Assignment + InvokeExper");
+      handleInvokeExpr(lo, ro);
+//        System.out.println("handleInvokeExpr returned");
+    }
+    else if(ro instanceof ArrayRef){
+      Value rightOpt = ((ArrayRef) ro).getBase();
+      handleRightOperand(lo,rightOpt);
+    }
+    else
+    {
+      System.out.println("Assignment + else");
+      Type type = ro.getType();
+      System.out.println(type);
+      String objId = createObjId(lo.toString(), className, mthdName);
+
+      if (sensitive_class.contains(type.toString()))
+      {
+        Dictionary privateLabel = makeRWLabel.createPrivateLabel();
+        if (!(labelManager.updateLabel(objId, privateLabel)))
+        {
+          String obj_id = createObjId(lo.toString(), className, mthdName);
+          labelManager.saveLabel(obj_id, privateLabel);
+        }
+      }
+      else
+      {
+        Dictionary publicLabel = makeRWLabel.createPublicLabel();
+        if (!(labelManager.updateLabel(objId, subLabel)))
+        {
+//            String obj_id = createObjId(lo.toString(), className, mthdName);
+          new RWLabel().createObjLabel(subLabel, lo.toString(), labelManager, className, mthdName);
+        }
+      }
+    }
     return true;
   }
   /*
@@ -167,11 +240,12 @@ public class StatementHanding
       handleEqualityOrNonEqualityCheck(abstractBinopExpr);
     }
     while(itr.hasNext()){
-//      System.out.println("Inside if");
+      System.out.println("Inside if");
       Unit unit  = (Unit) itr.next();
-      System.out.println(unit);
+//      ps.println(unit);
+//      System.out.println(unit);
       if(unit instanceof  ReturnVoidStmt){
-//        System.out.println("Return reached "+unit);
+        System.out.println("If Return reached "+unit);
         return ret;
       }
       else{
@@ -190,9 +264,9 @@ public class StatementHanding
     while(itr.hasNext()){
 //      System.out.println("Inside else");
       Unit unit = (Unit) itr.next();
-      System.out.println(unit);
+//      System.out.println(unit);
       if(unit instanceof ReturnVoidStmt){
-//        System.out.println("Else Return reached "+unit);
+        System.out.println("Else Return reached "+unit);
         return ret;
       }
       else{
@@ -203,6 +277,13 @@ public class StatementHanding
     return ret;
   }
 
+  public void handleReturnVoid(Unit u){
+    return;
+  }
+  public void handleReturn(Unit u){
+    return;
+  }
+  
 //  public boolean handleIfStmt(Unit s){
 //    System.out.println("If stmt");
 //    Value v = ((IfStmt) s).getCondition();

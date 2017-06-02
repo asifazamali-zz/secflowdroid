@@ -60,7 +60,7 @@ public class MakeRWLabel
     ret.put("writers",set);
     return ret;
   }
-  public static Dictionary createPublicLabel(){
+  public  Dictionary createPublicLabel(){
     Dictionary ret = new Hashtable();
     HashSet<String> hashSet = new HashSet<>();
     hashSet.add(Util.appPackageName);

@@ -26,15 +26,15 @@ public class LabelManager
     }
     return null;
   }
-  public boolean saveLabel(String obj_id,Dictionary label,String className,String methodName){
+  public boolean saveLabel(String obj_id,Dictionary label){
 //    obj_id = className+"."+methodName+"."+obj_id;
     d.put(obj_id,label);
     
    System.out.println("saveLabel: "+obj_id+"label "+label);
     return true;
   }
-  public boolean updateLabel(String obj_id,Dictionary objLabel,String className,String methodName){
-    obj_id = className+"."+methodName+"."+obj_id;
+  public boolean updateLabel(String obj_id,Dictionary objLabel){
+//    obj_id = className+"."+methodName+"."+obj_id;
 //    System.out.println(obj_id);
 //    if(obj_id.contains("com.example.asif.gpstracking.GPSTracker.getLongitude.$r0"))
 //      System.out.println(d);
