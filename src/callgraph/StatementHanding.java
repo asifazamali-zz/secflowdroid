@@ -5,15 +5,15 @@ import Main.java.Util;
 import fj.data.State;
 import ifc.LabelManager;
 import ifc.RWLabel;
+import polyglot.ast.Field;
 import polyglot.ast.If;
+import polyglot.ast.Special;
 import soot.*;
 import soot.jimple.*;
-import soot.jimple.internal.AbstractBinopExpr;
-import soot.jimple.internal.JEqExpr;
-import soot.jimple.internal.JInstanceOfExpr;
-import soot.jimple.internal.JNeExpr;
+import soot.jimple.internal.*;
 
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -21,7 +21,7 @@ import static Main.java.Util.*;
 import static callgraph.InformationFlowAnalysis.*;
 import static callgraph.InformationFlowAnalysis.labelManager;
 import static callgraph.InformationFlowAnalysis.makeRWLabel;
-import static callgraph.InformationFlowAnalysis.subLabel;
+
 import static callgraph.ProcessLocalMethod.createObjId;
 
 /**
@@ -36,57 +36,58 @@ public class StatementHanding
     this.mthdName = mthdName;
   }
 
-  public boolean handleLocalStatement(Value lo, Value ro)
+  public Dictionary handleLocalStatement(Value ro)
   {
-    checkAndDef(lo.toString(), className, mthdName);
+//    checkAndDef(lo.toString(), className, mthdName);
     checkAndDef(ro.toString(), className, mthdName);
     // lo <- ro checking and changing labels of subjects
 
-    subLabel = new RWLabel().checkRead(subLabel, labelManager.getLabel(ro.toString(), className, mthdName), labelManager);
-    // update label of lo 
-    String obj_id = createObjId(lo.toString(),className,mthdName);
-    labelManager.updateLabel(obj_id, labelManager.getLabel(ro.toString(), className, mthdName));
-    return true;
+//    subLabel = new RWLabel().checkRead(subLabel, labelManager.getLabel(ro.toString(), className, mthdName), labelManager);
+//    // update label of lo 
+//    String obj_id = createObjId(lo.toString(),className,mthdName);
+//    labelManager.updateLabel(obj_id, labelManager.getLabel(ro.toString(), className, mthdName));
+    return labelManager.getLabel(ro.toString(),className,mthdName);
   }
-  public boolean handleOnlyInvokeStmt(InvokeExpr invokeExpr){
-    if(invokeExpr instanceof InterfaceInvokeExpr){
-      Value base = ((InterfaceInvokeExpr) invokeExpr).getBase();
-//      System.out.println("interface base"+ base);
-      List args = invokeExpr.getArgs();
-      Iterator iterator = args.iterator();
-      while(iterator.hasNext()){
-        Value arg = (Value) iterator.next();
-//        System.out.println("arg: "+arg);
-        if(refLocals.contains(arg.toString())){
-          checkAndDef(arg.toString(),className,mthdName);
-        }
-        printLabel(arg.toString(),className,mthdName);
-      }
-//      String obj_id = createObjId(base.toString(),className,mthdName);
-
+  public Dictionary handleOnlyInvokeStmt(InvokeExpr invokeExpr){
+    Value base = null;
+    Dictionary ret = null;
+    if (invokeExpr instanceof InterfaceInvokeExpr)
+    {
+      System.out.println("Interfaceinvoke");
+      base = ((InterfaceInvokeExpr) invokeExpr).getBase();
+    }
+    else if(invokeExpr instanceof SpecialInvokeExpr){
+      System.out.println("special invoke");
+      base = ((SpecialInvokeExpr) invokeExpr).getBase();
+    }
+    else if(invokeExpr instanceof VirtualInvokeExpr){
+      System.out.println("virtual invoke");
+      base = ((VirtualInvokeExpr) invokeExpr).getBase();
+    }
+    else if(invokeExpr instanceof StaticInvokeExpr){
+      System.out.println("static invoke");
+      base = null;
+    }
+    if(base != null && refLocals.contains(base)){
+      checkAndDef(base .toString(),className,mthdName);
       printLabel(base.toString(),className,mthdName);
     }
-    return false;
-  }
-  public boolean handleInterfaceInvokeExpr(Value lo, Value ro)
-  {
-    System.out.println("handling Invoke Expr");
-    return true;
-  }
-
-  public boolean handleInvokeExpr(Value lo, Value ro)
-  {
-    checkAndDef(lo.toString(), className, mthdName);
-    checkAndDef(ro.toString(), className, mthdName);
-    Dictionary ret = null;
-    InvokeExpr invokeExpr = (InvokeExpr) ro;
+   
+//      String obj_id = createObjId(base.toString(),className,mthdName);
+    
+//    if(ro instanceof VirtualInvokeExpr){
+//
+////      VirtualInvokeExpr virtualInvokeExpr = (VirtualInvokeExpr) ro;
+//      rightOp = ((VirtualInvokeExpr) ro).getBase();
+//
+//    }
     SootMethod sootMethod = invokeExpr.getMethod();
-    List<Value> args = invokeExpr.getArgs();
+    
     String method = sootMethod.getName();
 
     String cName = sootMethod.getDeclaringClass().getName();
     System.out.println("Class :" + cName + " method :" + method);
-    
+
     if (cName.contains(Util.appPackageName))
     {
       System.out.println("Parse Method: " + method);
@@ -98,28 +99,89 @@ public class StatementHanding
       System.out.println("----------------------------------------------");
       System.out.println(Util.global_output_api_method);
 //            labelManager.updateLabel(lo.toString(),labelManager.getLabel(ro.toString()));
-    } else if (Util.global_output_api_method.containsKey(cName) && Util.global_output_api_method.get(cName).contains(method))
-    {
-//            System.out.println("Inside global_output_apis_method");
-      Dictionary publicLabel = new MakeRWLabel().createPublicLabel();
-      new RWLabel().checkRead(subLabel, publicLabel, labelManager);
     }
     System.out.println("arguments");
+    List<Value> args = invokeExpr.getArgs();
+    Dictionary publicLabel1 = null;
+    Dictionary publicLabel2  = createPublicLabel("dummyPublicLabel2");;
+    if(invokeExpr.getArgCount() > 0)
+    {
+      publicLabel1 = createPublicLabel("dummyPublicLabel1");
+
+
+    }
     for (Value v : args)
     {
-      System.out.print(v);
-      if (labelManager.getLabel(v.toString(), className, mthdName) != null)
+      System.out.println(v.toString());
+      if(refLocals.contains(v.toString())) {
+        if(labelManager.getLabel(v.toString(),className,mthdName) == null)
+          new RWLabel().createObjLabel(publicLabel1,v.toString(),labelManager,className,mthdName);
+        else
+          System.out.println(labelManager.getLabel(v.toString(),className,mthdName));
+        publicLabel2 = new RWLabel().checkRead(publicLabel2,labelManager.getLabel(v.toString(),className,mthdName),labelManager);
+      }
+
+    }
+    if(base!=null)
+    {
+      checkAndDef(base.toString(),className,mthdName);
+      publicLabel2 = new RWLabel().checkRead(publicLabel2,labelManager.getLabel(base.toString(),className,mthdName),labelManager);
+      String obj_id = createObjId(base.toString(),className,mthdName);
+      labelManager.updateLabel(obj_id,publicLabel2);
+    }
+//    Make all the args share the LUB{base,arg1,arg2,.....}
+    for(Value v:args){
+      if(refLocals.contains(v.toString()))
       {
-        String obj_id = createObjId(lo.toString(),className,mthdName);
-        labelManager.updateLabel(obj_id, labelManager.getLabel(v.toString(), className, mthdName));
+        String obj_id = createObjId(v.toString(),className,mthdName);
+        labelManager.updateLabel(obj_id,publicLabel2);
       }
     }
-    if (ret != null)
+    if (Util.global_output_api_method.containsKey(cName) && Util.global_output_api_method.get(cName).contains(method))
     {
-      String obj_id = createObjId(lo.toString(),className,mthdName);
-      labelManager.updateLabel(obj_id, ret);
+      System.out.println("Inside global_output_apis_method");
+      Dictionary publicLabel = createPublicLabel("dummyLabel."+className+"."+mthdName);
+      System.out.println("check write with "+publicLabel2);
+      new RWLabel().checkWrite(publicLabel2, publicLabel);
     }
-    return true;
+    else if(sensitive_api_method.containsKey(cName) && sensitive_api_method.get(cName).contains(method)){
+      System.out.println("-----------------------------------------------");
+      System.out.println("Sensitive api :"+cName+" "+method);
+      
+      System.out.println("-----------------------------------------------");
+
+      Dictionary privateLabel =  Util.makeRWLabel.createPrivateLabel();
+      subLabel = new RWLabel().checkRead(subLabel,privateLabel,labelManager);
+      System.out.println("changed subLabel "+subLabel);
+      if(base != null && refLocals.contains(base.toString()))
+      {
+        checkAndUpdate(base.toString(),className,mthdName);
+        System.out.println("updated obj_label "+base.toString()+" "+labelManager.getLabel(base.toString(),className,mthdName));
+      }
+    }
+    ret = publicLabel2;
+    
+    System.out.println("returning from assignment "+ret);
+    return ret;
+  }
+
+
+  public Dictionary handleInvokeExpr(Value ro)
+  {
+   
+//    System.out.println("handleInvokeExpr"+ro);
+    InvokeExpr invokeExpr = (InvokeExpr) ro;
+    Dictionary ret = handleOnlyInvokeStmt(invokeExpr);
+    System.out.println("returned form invokeOnly "+ret);
+    if(ret != null)
+    {
+      
+     return ret;
+    }
+    else{
+      ret = createPublicLabel("dummyLabel."+className+mthdName);
+    }
+    return ret;
   }
 
   public boolean handleIdentityStmt(Unit s)
@@ -129,86 +191,170 @@ public class StatementHanding
     if(lo instanceof Local)
     {
       if (ro.toString().contains("@this")){
-        checkAndDef(lo.toString(),className,mthdName);
+        Dictionary publicLabel = createPublicLabel("dummyLabel");
+        new RWLabel().createObjLabel(publicLabel,lo.toString(),labelManager,className,mthdName);
       }
 
       else if (ro.toString().contains("@parameter")){
-        checkAndDef(lo.toString(),className,mthdName);
-//        System.out.println("handle it later");
-//        System.out.println("Identity parameter "+((Parameter) ro).description());
+
+        Dictionary publicLabel = createPublicLabel("dummyLabel");
+        new RWLabel().createObjLabel(publicLabel,lo.toString(),labelManager,className,mthdName);
+
       }
       System.out.println(lo.toString() + " " + labelManager.getLabel(lo.toString(), className, mthdName));
     }
     return true;
   }
 
-  public boolean handleAssignmentStmt(Unit s)
+  public Dictionary handleAssignmentStmt(Unit s)
   {
     Value lo = ((DefinitionStmt) s).getLeftOp();
     Value ro = ((DefinitionStmt) s).getRightOp();
+    Dictionary ret = null;
+//    Assuming local can be only Local or ArrayRef type or FieldRef
     if (lo instanceof Local)
     {
-      handleRightOperand(lo,ro);
-      
-      System.out.println(lo.toString() + " " + labelManager.getLabel(lo.toString(), className, mthdName));
+      ret = handleRightOperand(lo, ro);
+      String obj_id = createObjId(lo.toString(),className,mthdName);
+      checkAndDef(lo.toString(),className,mthdName);
+      labelManager.updateLabel(obj_id,ret);
+//      System.out.println(lo.toString() + " " + labelManager.getLabel(lo.toString(), className, mthdName));
     }
     else if(lo instanceof ArrayRef){
 //      System.out.println("Array Ref Base "+((ArrayRef) lo).getBase());
       Value leftOp = ((ArrayRef) lo).getBase();
-      handleRightOperand(leftOp,ro);
-      System.out.println(leftOp.toString() + " " + labelManager.getLabel(leftOp.toString(), className, mthdName));
+      ret = handleRightOperand(lo,ro);
+      String obj_id = createObjId(leftOp.toString(),className,mthdName);
+      checkAndDef(leftOp.toString(),className,mthdName);
+      labelManager.updateLabel(obj_id,ret);
+//      System.out.println(leftOp.toString() + " " + labelManager.getLabel(leftOp.toString(), className, mthdName));
     }
-
-    return true;
+    else if(lo instanceof AbstractInstanceFieldRef){
+//      System.out.println(((AbstractInstanceFieldRef) lo).getBase());
+//      System.out.println(((AbstractInstanceFieldRef) lo).getField().getSignature());
+      ret = handleRightOperand(lo,ro);
+      String leftOp = ((AbstractInstanceFieldRef) lo).getBase().toString();
+      String signature = ((AbstractInstanceFieldRef) lo).getField().getSignature().toString();
+      
+      String obj_id = createObjId(leftOp,className,mthdName);
+      System.out.println("obj_id"+obj_id);
+      checkAndDef(leftOp.toString(),className,mthdName);
+      labelManager.updateLabel(obj_id,ret);
+      addLocalToField(obj_id,className+"."+signature);
+//      privateFieldsLocals.put(className+"."+signature,leftOp);
+      if(checkPrivateField(leftOp,className,mthdName)){
+        
+        privateFields.add(className+"."+signature);
+        System.out.println("---------------------------------------------------------------------------");
+        System.out.println("Sensitive Field Stored :"+ ro);
+        System.out.println("---------------------------------------------------------------------------");
+        ps.println("---------------------------------------------------------------------------");
+        ps.println("Sensitive Field Stored :"+ ro);
+        ps.println("---------------------------------------------------------------------------");
+      }
+    }
+    
+    return ret;
   }
-  public boolean handleRightOperand(Value lo, Value ro)
+  public Dictionary handleRightOperand(Value lo,Value ro)
   {
+    Dictionary ret = null;
     if (ro instanceof Local)
     {
       System.out.println("Check for subject label and assign sublabel to lo");
 
-      handleLocalStatement(lo, ro);
-    } else if (ro instanceof InterfaceInvokeExpr)
-    {
-      System.out.println("Assignment + Interfaceinvoke");
-      handleInterfaceInvokeExpr(lo, ro);
-    } else if (ro instanceof InvokeExpr)
-    {
-      System.out.println("Assignment + InvokeExper");
-      handleInvokeExpr(lo, ro);
-//        System.out.println("handleInvokeExpr returned");
+      ret = handleLocalStatement(ro);
     }
     else if(ro instanceof ArrayRef){
       Value rightOpt = ((ArrayRef) ro).getBase();
-      handleRightOperand(lo,rightOpt);
+      ret  = handleRightOperand(lo,rightOpt);
+    }
+    
+    else if (ro instanceof InvokeExpr)
+    {
+      System.out.println("Assignment + InvokeExper");
+      ret = handleInvokeExpr(ro);
+//        System.out.println("handleInvokeExpr returned");
+    }
+    else if(ro instanceof NewExpr)
+    {
+      
+      Type type = ro.getType();
+      System.out.println("newExpr" + ro.getType());
+      if (sensitive_class.contains(type.toString()))
+      {
+        Dictionary privateLabel = makeRWLabel.createPrivateLabel();
+        ret = privateLabel;
+
+      }
+      else{
+          checkAndDef(ro.toString(),className,mthdName);
+      }
+      ret = labelManager.getLabel(ro.toString(),className,mthdName);
+    }
+    else if(ro instanceof CastExpr){
+      Value val =((CastExpr) ro).getOp();
+      Type tpe = ro.getType();
+      if(sensitive_class.contains(tpe.toString())){
+        Dictionary privateLabel = makeRWLabel.createPrivateLabel();
+        new RWLabel().checkRead(subLabel,privateLabel,labelManager);
+        checkAndUpdate(val.toString(),className,mthdName);
+        
+      }
+      else{
+        checkAndDef(val.toString(),className,mthdName);
+      }
+      ret = labelManager.getLabel(val.toString(),className,mthdName);
+//        String obj_id = createObjId(lo.toString(),className,mthdName);
+//        labelManager.updateLabel(obj_id,labelManager.getLabel(ro.toString(),className,mthdName));
+    }
+    else if(ro instanceof AbstractInstanceFieldRef){
+//      System.out.println(((AbstractInstanceFieldRef) ro).getBase());
+//      System.out.println(((AbstractInstanceFieldRef) ro).getField().getSignature());
+      Value base = ((AbstractInstanceFieldRef) ro).getBase();
+      String signature = ((AbstractInstanceFieldRef) ro).getField().getDeclaration().toString();
+      String obj_id = createObjId(base.toString(),className,mthdName);
+      addLocalToField(obj_id,className+"."+signature);//// Add addLocalToField(obj_id(lo),signature);
+      obj_id = createObjId(lo.toString(),className,mthdName);
+      addLocalToField(obj_id,className+"."+signature);
+      if(privateFields.contains(className+"."+signature)){
+        Dictionary privateLabel = makeRWLabel.createPrivateLabel();
+        new RWLabel().checkRead(subLabel,privateLabel,labelManager);
+        checkAndDef(base.toString(),className,mthdName);
+        ret = privateLabel;
+        System.out.println("---------------------------------------------------------------------------");
+        System.out.println("Sensitive Field Access :"+ ro);
+        System.out.println("---------------------------------------------------------------------------");
+        ps.println("---------------------------------------------------------------------------");
+        ps.println("Sensitive Field Access :"+ ro);
+        ps.println("---------------------------------------------------------------------------");
+
+      }
+      else{
+        Dictionary publicLabel = createPublicLabel("dummyPublicLabel."+className+"."+mthdName);
+        ret = publicLabel;
+      }
     }
     else
     {
       System.out.println("Assignment + else");
       Type type = ro.getType();
       System.out.println(type);
-      String objId = createObjId(lo.toString(), className, mthdName);
+      
 
       if (sensitive_class.contains(type.toString()))
       {
         Dictionary privateLabel = makeRWLabel.createPrivateLabel();
-        if (!(labelManager.updateLabel(objId, privateLabel)))
-        {
-          String obj_id = createObjId(lo.toString(), className, mthdName);
-          labelManager.saveLabel(obj_id, privateLabel);
-        }
+        ret = privateLabel;
       }
       else
       {
-        Dictionary publicLabel = makeRWLabel.createPublicLabel();
-        if (!(labelManager.updateLabel(objId, subLabel)))
-        {
-//            String obj_id = createObjId(lo.toString(), className, mthdName);
-          new RWLabel().createObjLabel(subLabel, lo.toString(), labelManager, className, mthdName);
-        }
+        Dictionary publicLabel = createPublicLabel("dummyLabel."+className+"."+mthdName);
+        ret = publicLabel;
       }
     }
-    return true;
+    
+    return ret;
   }
   /*
   if cond then{ l1 = r1

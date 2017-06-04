@@ -1,2 +1,3 @@
 Landroid/util/Log;->d
 Landroid/widget/Toast;->makeText
+Ljava/io/OutputStreamWriter;->write

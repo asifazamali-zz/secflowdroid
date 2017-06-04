@@ -4,9 +4,11 @@ import Main.java.Util;
 
 import javax.print.attribute.standard.DialogTypeSelection;
 import java.awt.*;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.*;
+
+import static Main.java.Util.checkPrivateField;
+import static Main.java.Util.fieldsLocals;
+import static Main.java.Util.privateFields;
 
 /**
  * Created by asif on 5/26/17.
@@ -33,7 +35,7 @@ public class LabelManager
    System.out.println("saveLabel: "+obj_id+"label "+label);
     return true;
   }
-  public boolean updateLabel(String obj_id,Dictionary objLabel){
+  public static boolean updateLabel(String obj_id,Dictionary objLabel){
 //    obj_id = className+"."+methodName+"."+obj_id;
 //    System.out.println(obj_id);
 //    if(obj_id.contains("com.example.asif.gpstracking.GPSTracker.getLongitude.$r0"))
@@ -44,9 +46,41 @@ public class LabelManager
 //      newLabel.put("owner",((Dictionary)(d.get(obj_id).get("owner")));
 //      newLabel.put("readers",d.get(obj_id).
       d.put(obj_id,objLabel);
+      if(checkPrivate(objLabel) && fieldsLocals.containsKey(obj_id)){
+        System.out.println("updating fields"+fieldsLocals);
+        updateFields(obj_id);
+      }
       return true;
     }
     Util.ps.println(obj_id+ "not updated");
+    System.out.println(obj_id+" not updated");
+    return false;
+  }
+  public static boolean updateFields(String obj_id){
+    HashSet fields  = fieldsLocals.get(obj_id);
+    Iterator itr = fields.iterator();
+    while(itr.hasNext()){
+      String field = (String) itr.next();
+      
+      if(! privateFields.contains(field))
+      {
+        System.out.println("=======================================================");
+        System.out.println("Adding "+field);
+        System.out.println("======================================================="); 
+        
+        privateFields.add(field);
+      }
+    }
+    return false;
+  }
+  public static boolean checkPrivate(Dictionary label){
+    if(((Set)label.get("writers")).size()>1)
+    {
+      System.out.println("checking for private"+label);
+      System.out.println(fieldsLocals);
+
+      return true;
+    }
     return false;
   }
   public boolean deleteLabel(String obj_id){

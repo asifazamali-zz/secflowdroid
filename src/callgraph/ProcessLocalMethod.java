@@ -15,10 +15,7 @@ import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.List;
 
-import static Main.java.Util.makeRWLabel;
-import static Main.java.Util.sensitive_api_method;
-import static Main.java.Util.sensitive_class;
-import static callgraph.InformationFlowAnalysis.subLabel;
+import static Main.java.Util.*;
 
 /**
  * Created by asif on 5/28/17.
@@ -81,9 +78,9 @@ public class ProcessLocalMethod
         {
           if (ro instanceof Local)
           {
-            if(InformationFlowAnalysis.checkAndDef(lo.toString(),className,methodName))
+            if(checkAndDef(lo.toString(),className,methodName))
               Util.ps.println(createObjId(lo.toString(),className,methodName)+" created");
-            if(InformationFlowAnalysis.checkAndDef(ro.toString(),className,methodName))
+            if(checkAndDef(ro.toString(),className,methodName))
               Util.ps.println(createObjId(ro.toString(),className,methodName)+" created");
 
             // lo <- ro checking and changing labels of subjects
@@ -99,9 +96,9 @@ public class ProcessLocalMethod
           }
           else if (ro instanceof InvokeExpr)
           {
-            if(InformationFlowAnalysis.checkAndDef(lo.toString(),className,methodName))
+            if(checkAndDef(lo.toString(),className,methodName))
               Util.ps.println(createObjId(lo.toString(),className,methodName)+" created");
-            if(InformationFlowAnalysis.checkAndDef(ro.toString(),className,methodName))
+            if(checkAndDef(ro.toString(),className,methodName))
               Util.ps.println(createObjId(ro.toString(),className,methodName)+" created");
 
             InvokeExpr invokeExpr = (InvokeExpr) ro;
@@ -142,9 +139,9 @@ public class ProcessLocalMethod
             labelManager.updateLabel(obj_id,subLabel);
           }
           else if(ro instanceof FieldRef){
-            if(InformationFlowAnalysis.checkAndDef(lo.toString(),className,methodName))
+            if(checkAndDef(lo.toString(),className,methodName))
               Util.ps.println(createObjId(lo.toString(),className,methodName)+" created");
-            if(InformationFlowAnalysis.checkAndDef(ro.toString(),className,methodName))
+            if(checkAndDef(ro.toString(),className,methodName))
               Util.ps.println(createObjId(ro.toString(),className,methodName)+" created");
 
             SootField sootField = ((FieldRef)ro).getField();

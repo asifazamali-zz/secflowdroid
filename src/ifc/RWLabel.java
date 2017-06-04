@@ -50,6 +50,23 @@ public class RWLabel
     }
     return ret;
   }
+  public boolean checkWrite(Dictionary subLabel, Dictionary objLabel){
+    if(((Set) subLabel.get("owner")).containsAll((Set) objLabel.get("owner")) && (((Set) subLabel.get("readers")).containsAll((Set) objLabel.get("readers"))) && (((Set) objLabel.get("writers")).containsAll((Set) subLabel.get("writers"))) )
+    {
+
+          System.out.println("Can write");
+          return true;
+    }
+    else{
+      Util.ps.println("***************** misuse *************");
+      Util.ps.println("subLabel "+subLabel+" tries to write "+objLabel);
+      Util.ps.println("***************** misuse *************");
+      System.out.println("***************** misuse *************");
+      System.out.println("subLabel "+subLabel+" tries to write "+objLabel);
+      System.out.println("***************** misuse *************");
+    }
+    return false;
+  }
 
   public Dictionary changeLabelRead(Dictionary subLabel, Dictionary objLabel)
   {
@@ -65,13 +82,7 @@ public class RWLabel
     return newSubLabel;
   }
 
-  public boolean checkWrite(Dictionary subLabel, Dictionary objLabel)
-  {
-    boolean temp = ((Set) objLabel.get("writers")).containsAll((Set) subLabel.get("owner")) && ((Set) subLabel.get("readers")).containsAll((Set) objLabel.get("readers")) && (((Set) objLabel.get("writers")).containsAll((Set) subLabel.get("writers")));
-    if (temp)
-      return true;
-    return false;
-  }
+  
 
   public Set unionSet(Set s1, Set s2)
   {

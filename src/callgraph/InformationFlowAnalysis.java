@@ -26,7 +26,7 @@ import javax.swing.*;
 import java.util.*;
 import java.util.List;
 
-import static Main.java.Util.ps;
+import static Main.java.Util.*;
 
 /**
  * Created by asif on 5/27/17.
@@ -53,17 +53,15 @@ public class InformationFlowAnalysis
   public static Map          unitToGenerateSet;
   public static LabelManager labelManager;
   public static MakeRWLabel  makeRWLabel;
-  public static Dictionary   subLabel;
-  public        String       className;
-  public        String       mthdName;
+  public static       String       className;
+  public static       String       mthdName;
   public static StatementHanding statementHanding;
-  public static HashSet<Local> refLocals;
+  public static HashSet<String> refLocals;
   public InformationFlowAnalysis(UnitGraph g, LabelManager lblManager, Dictionary subLbl, String className, String mthdName)
   {
 //    super(g);
     labelManager = Util.labelManager;
     makeRWLabel = Util.makeRWLabel;
-    subLabel = subLbl;
     this.className = className;
     this.mthdName = mthdName;
     unitToGenerateSet = new HashMap();
@@ -79,7 +77,7 @@ public class InformationFlowAnalysis
       Local l = (Local) localIt.next();
       System.out.println(l.getName());
 //      String obj_id = l.getName();
-      refLocals.add(l);
+      refLocals.add(l.toString());
 //      if (l.getType() instanceof RefLikeType) //RefLikeType --> null in java
 //        fullSet.add(l);
     }
@@ -344,17 +342,7 @@ public class InformationFlowAnalysis
 //  }
 
 
-  public static boolean checkAndDef(String obj_id, String className, String methodName)
-  {
-    Dictionary lolabel = labelManager.getLabel(obj_id, className, methodName);
-    if (lolabel == null)
-    {
-      Dictionary objLabel = makeRWLabel.makeRWLabel(subLabel, obj_id, true, labelManager, className, methodName);
-//      labelManager.saveLabel(obj_id,objLabel,className,methodName);
-      return false;
-    }
-    return true;
-  }
+
 
   public static boolean handleStatement(Iterator itr, Unit s){
     ps.println(s);
@@ -376,8 +364,9 @@ public class InformationFlowAnalysis
       if (s instanceof AssignStmt)
       {
         System.out.println("Assignment Statment");
-        statementHanding.handleAssignmentStmt(s);
+        System.out.println(statementHanding.handleAssignmentStmt(s));
       }
+      ps.println(labelManager.getLabel(lo.toString(),className,mthdName));
 
     }
     else if (s instanceof IfStmt)
@@ -409,7 +398,7 @@ public class InformationFlowAnalysis
 //      InvokeExpr invokeExpr = ((InvokeStmt) s).getInvokeExpr();
       
     }
-    if(s instanceof InterfaceInvokeExpr){
+    else if(s instanceof InterfaceInvokeExpr){
       System.out.println("invokeExper"+s);
     }
     else

@@ -6,6 +6,7 @@ import callgraph.InformationFlowAnalysis;
 import fj.Hash;
 import fj.data.Array;
 import ifc.LabelManager;
+import ifc.RWLabel;
 import soot.*;
 import soot.jimple.infoflow.android.manifest.ProcessManifest;
 import soot.jimple.toolkits.callgraph.CallGraph;
@@ -40,6 +41,9 @@ public class Util {
     public static MakeRWLabel makeRWLabel;
     public static PrintStream ps;
     public static Dictionary subLabel;
+    public static HashSet<String> privateFields = new HashSet<>();
+    public static HashMap<String,HashSet> fieldsLocals = new HashMap();
+    public static Dictionary privateFieldsLabels = new Hashtable();
 //    public static String getTimeString() {
 //        long timeMillis = System.currentTimeMillis();
 //        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-hhmmss");
@@ -185,6 +189,7 @@ public class Util {
 //        getJimpleFile();   <-----------gives only jimple file
 
        flowControl();        //<----------- labeling
+        
     }
     public static void getJimpleFile()
     {
@@ -228,6 +233,9 @@ public class Util {
                 Body b = sootMethod.retrieveActiveBody();
                 UnitGraph unitGraph = new ExceptionalUnitGraph(b);
                 InformationFlowAnalysis informationFlowAnalysis = new InformationFlowAnalysis(unitGraph, labelManager, subLabel, convertClass(classes.get(i)), methods.get(i));
+
+                System.out.println(fieldsLocals);
+                System.out.println(privateFields);
 //                Iterator itr = unitGraph.iterator();
 //                while (itr.hasNext())
 //                {
@@ -246,18 +254,24 @@ public class Util {
         str1 =str2.split(";",2)[0];
         return str1;
     }
-    public static void createSubjectLabel(){
+    public static Dictionary createPublicLabel(String obj_id){
+        Dictionary ret;
         makeRWLabel = new MakeRWLabel();
         HashSet<String> subOwner = new HashSet<>();
         subOwner.add(appPackageName);
         HashSet<String> readers = new HashSet<>();
         readers.add(appPackageName);
         readers.add("public");
-        
-        subLabel = makeRWLabel.makeSubLabel(subOwner,readers); // subjectLevel(packageName,packageName,packageName)
-        labelManager = new LabelManager();
-        labelManager.saveLabel("S1",subLabel);
 
+        ret = makeRWLabel.makeSubLabel(subOwner,readers);
+        labelManager = new LabelManager();
+        labelManager.saveLabel(obj_id,ret);
+        return ret;
+    }
+    public static void createSubjectLabel(){
+        
+        subLabel = createPublicLabel("S1"); // subjectLevel(packageName,packageName,packageName)
+        
     }
     public static String trimMethods(String str){
        return str.split("\\(",2)[0];
@@ -269,5 +283,54 @@ public class Util {
 //        String obj_id = createObjId(var,className,methodName);
         System.out.println(var+" "+labelManager.getLabel(var,className,methodName));
     }
-    
+    public static void checkAndUpdate(String _id,String className,String methodName){
+        String obj_id = createObjId(_id,className,methodName);
+        if(checkAndDef(_id,className,methodName))
+        {
+            labelManager.updateLabel(obj_id, subLabel);
+//            System.out.println("checkAndDef "+subLabel);
+        }
+        else{
+            System.out.println("label created");
+        }
+    }
+    public static boolean checkPrivateField(String obj_id,String className,String methodName){
+        if(((Set)labelManager.getLabel(obj_id,className,methodName).get("writers")).size()>1)
+            return true;
+        return false;
+    }
+
+    public static boolean checkAndDef(String obj_id, String className, String methodName)
+    {
+        if(obj_id == null)
+            return false;
+        Dictionary lolabel = labelManager.getLabel(obj_id, className, methodName);
+        System.out.println("Check and Def "+obj_id+" "+lolabel);
+        if (lolabel == null)
+        {
+            Dictionary publicLabel = createPublicLabel("dummyLabel"+className+methodName);
+            new RWLabel().createObjLabel(publicLabel,obj_id,labelManager,className,methodName);
+//      labelManager.saveLabel(obj_id,objLabel,className,methodName);
+            return false;
+        }
+        return true;
+    }
+    public static boolean addLocalToField(String key, String value){
+        if(fieldsLocals.containsKey(key)){
+            if(!fieldsLocals.get(key).contains(value))
+                fieldsLocals.get(key).add(value);
+            return true;
+        }
+        else
+        {
+            HashSet hashSet = new HashSet();
+            hashSet.add(value);
+            System.out.println("adding it to fields locals"+fieldsLocals);
+            fieldsLocals.put(key, hashSet);
+            System.out.println("adding it to fields locals"+fieldsLocals);
+
+        }
+        
+        return false;
+    }
 }
