@@ -76,8 +76,8 @@ public class LabelManager
   public static boolean checkPrivate(Dictionary label){
     if(((Set)label.get("writers")).size()>1)
     {
-      System.out.println("checking for private"+label);
-      System.out.println(fieldsLocals);
+//      System.out.println("checking for private"+label);
+//      System.out.println(fieldsLocals);
 
       return true;
     }

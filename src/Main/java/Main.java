@@ -25,10 +25,10 @@ public class Main {
 
         generateCGForAPK(
                 // TODO @Yuxuan, replace this with your APK path
-                "/home/asif/MTP/Experiments/apimonitor/APIMonitor-beta/apks_old/FileInputOutput.apk",
+                "/home/asif/MTP/Experiments/apimonitor/APIMonitor-beta/apks_old/Read_SMS.apk",
                 "output",
                 "android.jar",
-                "/home/asif/MTP/Experiments/apimonitor/APIMonitor-beta/logs/FileInputOutput.log",
+                "/home/asif/MTP/Experiments/apimonitor/APIMonitor-beta/logs/ReadSMS.log",
                 "sensitive_apis.txt",
                 "global_output_apis.txt");
 

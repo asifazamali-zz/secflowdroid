@@ -158,6 +158,7 @@ public class StatementHanding
         checkAndUpdate(base.toString(),className,mthdName);
         System.out.println("updated obj_label "+base.toString()+" "+labelManager.getLabel(base.toString(),className,mthdName));
       }
+      publicLabel2 = subLabel;
     }
     ret = publicLabel2;
     

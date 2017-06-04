@@ -186,9 +186,9 @@ public class Util {
                 dict_class_method.put(sootClass,methodList);
             }    
         }
-//        getJimpleFile();   <-----------gives only jimple file
+        getJimpleFile();   //<-----------gives only jimple file
 
-       flowControl();        //<----------- labeling
+//       flowControl();        //<----------- labeling
         
     }
     public static void getJimpleFile()
