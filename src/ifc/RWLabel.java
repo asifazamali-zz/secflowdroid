@@ -7,7 +7,8 @@ import fj.Hash;
 
 import java.util.*;
 
-import static callgraph.ProcessLocalMethod.createObjId;
+import static Main.java.Util.createObjId;
+
 
 /**
  * Created by asif on 5/26/17.

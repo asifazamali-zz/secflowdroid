@@ -8,6 +8,7 @@ import fj.data.Array;
 import ifc.LabelManager;
 import ifc.RWLabel;
 import soot.*;
+import soot.jimple.InvokeExpr;
 import soot.jimple.infoflow.android.manifest.ProcessManifest;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
@@ -21,7 +22,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static callgraph.ProcessLocalMethod.createObjId;
 
 public class Util {
     public static final Logger LOGGER = Logger.getLogger("APK_CG");
@@ -232,10 +232,10 @@ public class Util {
             {
                 Body b = sootMethod.retrieveActiveBody();
                 UnitGraph unitGraph = new ExceptionalUnitGraph(b);
-                InformationFlowAnalysis informationFlowAnalysis = new InformationFlowAnalysis(unitGraph, labelManager, subLabel, convertClass(classes.get(i)), methods.get(i));
+                ArrayList<Dictionary> paraLabels = new ArrayList();
+                InformationFlowAnalysis informationFlowAnalysis = new InformationFlowAnalysis(unitGraph, labelManager, subLabel, convertClass(classes.get(i)), methods.get(i),paraLabels);
 
-                System.out.println(fieldsLocals);
-                System.out.println(privateFields);
+                informationFlowAnalysis.trials();
 //                Iterator itr = unitGraph.iterator();
 //                while (itr.hasNext())
 //                {
@@ -300,16 +300,16 @@ public class Util {
         return false;
     }
 
-    public static boolean checkAndDef(String obj_id, String className, String methodName)
+    public static boolean checkAndDef(String _id, String className, String methodName)
     {
-        if(obj_id == null)
+        if(_id == null)
             return false;
-        Dictionary lolabel = labelManager.getLabel(obj_id, className, methodName);
-        System.out.println("Check and Def "+obj_id+" "+lolabel);
+        Dictionary lolabel = labelManager.getLabel(_id, className, methodName);
+        System.out.println("Check and Def "+_id+" "+lolabel);
         if (lolabel == null)
         {
             Dictionary publicLabel = createPublicLabel("dummyLabel"+className+methodName);
-            new RWLabel().createObjLabel(publicLabel,obj_id,labelManager,className,methodName);
+            new RWLabel().createObjLabel(publicLabel,_id,labelManager,className,methodName);
 //      labelManager.saveLabel(obj_id,objLabel,className,methodName);
             return false;
         }
@@ -325,12 +325,16 @@ public class Util {
         {
             HashSet hashSet = new HashSet();
             hashSet.add(value);
-            System.out.println("adding it to fields locals"+fieldsLocals);
+//            System.out.println("adding it to fields locals"+fieldsLocals);
             fieldsLocals.put(key, hashSet);
-            System.out.println("adding it to fields locals"+fieldsLocals);
+//            System.out.println("adding it to fields locals"+fieldsLocals);
 
         }
         
         return false;
     }
+    public static String createObjId(String obj_id,String className,String methodName){
+        return className+"."+methodName+"."+obj_id;
+    }
+    
 }

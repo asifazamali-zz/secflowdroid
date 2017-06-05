@@ -47,7 +47,7 @@ public class LabelManager
 //      newLabel.put("readers",d.get(obj_id).
       d.put(obj_id,objLabel);
       if(checkPrivate(objLabel) && fieldsLocals.containsKey(obj_id)){
-        System.out.println("updating fields"+fieldsLocals);
+//        System.out.println("updating fields"+fieldsLocals);
         updateFields(obj_id);
       }
       return true;

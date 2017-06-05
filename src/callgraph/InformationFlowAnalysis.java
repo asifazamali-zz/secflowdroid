@@ -56,31 +56,32 @@ public class InformationFlowAnalysis
   public static       String       className;
   public static       String       mthdName;
   public static StatementHanding statementHanding;
-  public static HashSet<String> refLocals;
-  public InformationFlowAnalysis(UnitGraph g, LabelManager lblManager, Dictionary subLbl, String className, String mthdName)
+  public  HashSet<String> refLocals;
+  public ArrayList<Dictionary> paraLabels;
+  public int paraIndex;
+  public UnitGraph g;
+  public InformationFlowAnalysis(UnitGraph g, LabelManager lblManager, Dictionary subLbl, String className, String mthdName,ArrayList paraLabels)
   {
 //    super(g);
     labelManager = Util.labelManager;
     makeRWLabel = Util.makeRWLabel;
     this.className = className;
     this.mthdName = mthdName;
+    this.g = g;
+    this.paraLabels = paraLabels;
+    paraIndex = -1;
     unitToGenerateSet = new HashMap();
     Body b = g.getBody();
     refLocals = new HashSet<>();
-//    emptySet = new ArraySparseSet();
-//    fullSet = new ArraySparseSet();
     Iterator localIt = b.getLocals().iterator();
-//    System.out.println("locals" + className + " " + mthdName);
-    statementHanding = new StatementHanding(className,mthdName);
     while (localIt.hasNext())
     {
       Local l = (Local) localIt.next();
       System.out.println(l.getName());
-//      String obj_id = l.getName();
       refLocals.add(l.toString());
-//      if (l.getType() instanceof RefLikeType) //RefLikeType --> null in java
-//        fullSet.add(l);
     }
+    statementHanding = new StatementHanding(className,mthdName,refLocals);
+    
   
 //    Iterator unitIt = b.getUnits().iterator();
 //    while(unitIt.hasNext()){
@@ -120,18 +121,20 @@ public class InformationFlowAnalysis
 //
 //    // Call superclass method to do work.
 //    doAnalysis();
-    trials(g,labelManager,subLbl,className,mthdName);
+    
   }
 
-  public void trials(UnitGraph g, LabelManager lblManager, Dictionary subLbl, String className, String mthdName){
+  public Dictionary trials(){
 //    System.out.println("Inside trials");
     Iterator itr = g.iterator();
+    Dictionary ret = null;
     while(itr.hasNext())
     {
       Unit s = (Unit) itr.next();
 //      System.out.println(s);
-      handleStatement(itr, s);
+      ret = handleStatement(itr, s);
     }
+    return ret;
   }
 //  protected void flowThrough(Object srcValue, Unit unit,
 //                             List fallOut, List branchOuts)
@@ -344,27 +347,29 @@ public class InformationFlowAnalysis
 
 
 
-  public static boolean handleStatement(Iterator itr, Unit s){
+  public Dictionary handleStatement(Iterator itr, Unit s){
     ps.println(s);
     System.out.println(s);
+    Dictionary ret = null;
 //    System.out.println("handle statement called");
     if (s instanceof DefinitionStmt)
     {
       DefinitionStmt as = (DefinitionStmt) s;
       Value lo = as.getLeftOp();
-      Value ro = as.getRightOp();
 //            System.out.println("Definition Stmt "+as);
       //      System.out.println("Value "+ro);
       // extract cast argument
       if (s instanceof IdentityStmt)
       {
         System.out.println("Identity Statement");
-        statementHanding.handleIdentityStmt(s);
+        ret = statementHanding.handleIdentityStmt(this,s);
+        System.out.println("returning Identity Statement"+ret);
       }
       if (s instanceof AssignStmt)
       {
         System.out.println("Assignment Statment");
-        System.out.println(statementHanding.handleAssignmentStmt(s));
+        ret = statementHanding.handleAssignmentStmt(s);
+        System.out.println("returning Assignment statement" +ret);
       }
       ps.println(labelManager.getLabel(lo.toString(),className,mthdName));
 
@@ -378,32 +383,38 @@ public class InformationFlowAnalysis
 //
 //      System.out.println("getCondition " + valueBox.getValue());
       if(((IfStmt) s).getTarget() instanceof ReturnVoidStmt)
-        statementHanding.handleIfStatement(itr,s);
+       ret =  statementHanding.handleIfStatement(this,itr,s);
       else
-        statementHanding.handleIfElseStatement(itr,s);
-//      System.out.println("getTarget " + ((IfStmt) s).getTarget());
-//      System.out.println("TargetBox " + ((IfStmt) s).getTargetBox().getUnit());
+        ret = statementHanding.handleIfElseStatement(this, itr,s);
+      System.out.println("returning If statement "+ret);
     }
     else if (s instanceof ReturnVoidStmt){
       System.out.println("returnvoid"+s);
-      statementHanding.handleReturnVoid(s);
+      ret = statementHanding.handleReturnVoid(s);
+      System.out.println("returning ReturnVoid"+ret);
     }
     else if(s instanceof Return){
       System.out.println("return value");
-      statementHanding.handleReturn(s);
+      ret = statementHanding.handleReturn(s);
+      System.out.println("returning Return "+ret);
     }
     else if(s instanceof InvokeStmt){
-      statementHanding.handleOnlyInvokeStmt(((InvokeStmt) s).getInvokeExpr());
+      ret = statementHanding.handleOnlyInvokeStmt(((InvokeStmt) s).getInvokeExpr());
 //      System.out.println("invokeStmt"+s);
 //      InvokeExpr invokeExpr = ((InvokeStmt) s).getInvokeExpr();
-      
+      System.out.println("returning invokeStmt "+ret);
     }
     else if(s instanceof InterfaceInvokeExpr){
       System.out.println("invokeExper"+s);
+      ret = null;
     }
     else
+    {
+      System.out.println("handleStatement else");
       System.out.println(s);
-    return false;
+      ret = null;
+    }
+    return ret;
   }
 
 }
