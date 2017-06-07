@@ -43,8 +43,10 @@ public class Util {
     public static Dictionary subLabel;
     public static HashSet<String> privateFields = new HashSet<>();
     public static HashMap<String,HashSet> fieldsLocals = new HashMap();
-    public static Dictionary privateFieldsLabels = new Hashtable();
-//    public static String getTimeString() {
+    public static HashMap<String,String> staticFields = new HashMap<>();
+    public static HashSet<String> privateStaticFields =  new HashSet<>();
+    public static HashMap<String,String> varIntent = new HashMap<>();
+    public static HashMap<String,String> classVar = new HashMap<>();
 //        long timeMillis = System.currentTimeMillis();
 //        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-hhmmss");
 //        Date date = new Date(timeMillis);
@@ -189,7 +191,7 @@ public class Util {
         getJimpleFile();   //<-----------gives only jimple file
 
 //       flowControl();        //<----------- labeling
-        
+
     }
     public static void getJimpleFile()
     {
@@ -333,6 +335,21 @@ public class Util {
         
         return false;
     }
+    
+//    public static boolean addStaticField(String key, String value){
+//        if(staticFields.containsKey(key)){
+//            if(!staticFields.get(key).contains(value))
+//                staticFields.get(key).add(value);
+//            return true;
+//        }
+//        else{
+//            HashSet hashSet = new HashSet();
+//            hashSet.add(value);
+//            staticFields.put(key,hashSet);
+//        }
+//        return false;
+//    }
+    
     public static String createObjId(String obj_id,String className,String methodName){
         return className+"."+methodName+"."+obj_id;
     }

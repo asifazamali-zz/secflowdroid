@@ -75,6 +75,7 @@ public class StatementHanding
     else if(invokeExpr instanceof SpecialInvokeExpr){
       System.out.println("special invoke");
       base = ((SpecialInvokeExpr) invokeExpr).getBase();
+      
     }
     else if(invokeExpr instanceof VirtualInvokeExpr){
       System.out.println("virtual invoke");
@@ -119,6 +120,40 @@ public class StatementHanding
       System.out.println(Util.global_output_api_method);
 //            labelManager.updateLabel(lo.toString(),labelManager.getLabel(ro.toString()));
     }
+    
+    // Handling Intent intent = new Intent(getApplicationContext(),ClassName);
+    else if(invokeExpr instanceof SpecialInvokeExpr &&  cName.contains("android.content.Intent") && method.contains("<init>")){
+      System.out.println("handling Intent");
+      handleIntent(base.toString(), invokeExpr);
+    }
+    // intent.putExtra("val","val1");
+//    else if(cName.contains("android.content.Intent") && method.contains("putExtra")){
+//      List<Value> args = invokeExpr.getArgs();
+//      String args1 = args.get(0).toString();
+//      String obj_id = createObjId(args1,className,mthdName);
+////       if "val" is static Field and initialized
+//      Dictionary label = labelManager.getLabel(args.get(1).toString(),className,mthdName);
+//
+//      if(staticFields.get(obj_id) != null){
+//        String staticField = staticFields.get(obj_id); // Static field in form of "className + . + signature "
+//        createPublicLabel(staticField);
+//        labelManager.updateLabel(staticField,label);
+//        System.out.println("updated Static Field Value" + labelManager.getStaticLabel(staticField)); 
+//      }
+////    given any key have to handle for giving any key 
+//      else{
+//        System.out.println(obj_id+ " variable not present");
+////        staticFields(args1,        
+////        new Exception("var not present").printStackTrace();
+//      }
+//    }
+    
+//    Bundle bundle = getIntent().getExtras();
+//    ArrayString arrayString = bundle.getStringArrayList() or bundle.getString()
+//    else if(cName.contains("android.os.Bundle") && (method.contains("getStringArrayList") || method.contains("getString"))){
+//      System.out.println("inside getString()");
+//        
+//    }
     else
     {
       System.out.println("arguments");
@@ -130,20 +165,20 @@ public class StatementHanding
       {
         publicLabel1 = createPublicLabel("dummyPublicLabel1");
 
-
-      }
-      for (Value v : args)
-      {
-        System.out.println(v.toString());
-        if (refLocals.contains(v.toString()))
+        for (Value v : args)
         {
-          if (labelManager.getLabel(v.toString(), className, mthdName) == null)
-            new RWLabel().createObjLabel(publicLabel1, v.toString(), labelManager, className, mthdName);
-          else
-            System.out.println(labelManager.getLabel(v.toString(), className, mthdName));
-          publicLabel2 = new RWLabel().checkRead(publicLabel2, labelManager.getLabel(v.toString(), className, mthdName), labelManager);
+          System.out.println(v.toString());
+          if (refLocals.contains(v.toString()))
+          {
+            if (labelManager.getLabel(v.toString(), className, mthdName) == null)
+              new RWLabel().createObjLabel(publicLabel1, v.toString(), labelManager, className, mthdName);
+            else
+              System.out.println(labelManager.getLabel(v.toString(), className, mthdName));
+            publicLabel2 = new RWLabel().checkRead(publicLabel2, labelManager.getLabel(v.toString(), className, mthdName), labelManager);
+          }
         }
       }
+      
 //      ro   = LUB{publicLabel2, base}
 //      base = ro
       if (base != null && refLocals.contains(base.toString()))
@@ -255,16 +290,8 @@ public class StatementHanding
     Value ro = ((DefinitionStmt) s).getRightOp();
     Dictionary ret = null;
 //    Assuming local can be only Local or ArrayRef type or FieldRef
-    if (lo instanceof Local)
-    {
-      ret = handleRightOperand(lo, ro);
-      System.out.println("returned from handle right Handle Operand"+ret);
-      String obj_id = createObjId(lo.toString(),className,mthdName);
-      checkAndDef(lo.toString(),className,mthdName);
-      labelManager.updateLabel(obj_id,ret);
-      System.out.println(lo.toString() + " " + labelManager.getLabel(lo.toString(), className, mthdName));
-    }
-    else if(lo instanceof ArrayRef){
+    
+    if(lo instanceof ArrayRef){
       System.out.println("Array Ref Base "+((ArrayRef) lo).getBase());
       Value leftOp = ((ArrayRef) lo).getBase();
       ret = handleRightOperand(lo,ro);
@@ -299,6 +326,31 @@ public class StatementHanding
         ps.println("Sensitive Field Stored :" + ro);
         ps.println("---------------------------------------------------------------------------");
       }
+    }
+    else if(ro instanceof StaticFieldRef){
+//      System.out.println("Adding "+ro.toString()+" to static fields ");
+      checkAndDef(lo.toString(),className,mthdName);
+      String obj_id = createObjId(lo.toString(), className, mthdName);
+
+      if(privateStaticFields.contains(ro.toString())){          // if static field is private and lo = static field assign the label of lo to be private
+        labelManager.updateLabel(obj_id,makeRWLabel.createPrivateLabel());
+      }
+      else
+      {
+
+        //Overwrite the variable 
+        staticFields.put(obj_id,ro.toString());
+//        addStaticField(obj_id, className+"."+ro.toString());
+      }
+    }
+    else if (lo instanceof Local)
+    {
+      ret = handleRightOperand(lo, ro);
+      System.out.println("returned from handle right Handle Operand"+ret);
+      String obj_id = createObjId(lo.toString(),className,mthdName);
+      checkAndDef(lo.toString(),className,mthdName);
+      labelManager.updateLabel(obj_id,ret);
+      System.out.println(lo.toString() + " " + labelManager.getLabel(lo.toString(), className, mthdName));
     }
     else{
       System.out.println("Assignment + lo +else "+lo.toString());
@@ -339,7 +391,7 @@ public class StatementHanding
 
       }
       else{
-        System.out.println("Inside Assignment + ro + else "+ ro.toString());
+        System.out.println("Inside Assignment + ro+ NewExpr +else "+ ro.toString());
           checkAndDef(ro.toString(),className,mthdName);
       }
       ret = labelManager.getLabel(ro.toString(),className,mthdName);
@@ -392,13 +444,12 @@ public class StatementHanding
         ret = publicLabel;
       }
     }
+    
     else
     {
       System.out.println("Assignment +ro + else");
       Type type = ro.getType();
       System.out.println(type);
-      
-
       if (sensitive_class.contains(type.toString()))
       {
         Dictionary privateLabel = makeRWLabel.createPrivateLabel();
@@ -548,6 +599,22 @@ public class StatementHanding
     new RWLabel().checkRead(subLabel,labelManager.getLabel(lo.toString(),className,mthdName),labelManager);
     if( ! (ro instanceof Constant || ro == NullConstant.v()))
        new RWLabel().checkRead(subLabel,labelManager.getLabel(ro.toString(),className,mthdName),labelManager);
+    return false;
+  }
+  
+  public boolean handleIntent(String base, InvokeExpr invokeExpr){
+    
+    // Classify between Implicit and Explicit Intent
+    System.out.println("handleIntent + arguments");
+    varIntent.put(base,invokeExpr.getMethodRef().getSignature().toString());
+    List<Value> args = invokeExpr.getArgs();
+    for(Value arg:args){
+      if (arg instanceof ClassConstant){
+        String convertedClass = arg.toString().replace('/','.');
+//        System.out.println("convertedClass "+convertedClass);
+        classVar.put(base,convertedClass);
+      }
+    }
     return false;
   }
 }

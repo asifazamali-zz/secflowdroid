@@ -6,9 +6,7 @@ import javax.print.attribute.standard.DialogTypeSelection;
 import java.awt.*;
 import java.util.*;
 
-import static Main.java.Util.checkPrivateField;
-import static Main.java.Util.fieldsLocals;
-import static Main.java.Util.privateFields;
+import static Main.java.Util.*;
 
 /**
  * Created by asif on 5/26/17.
@@ -26,6 +24,11 @@ public class LabelManager
     if(d.get(obj_id) != null){
       return (Dictionary) d.get(obj_id);
     }
+    return null;
+  }
+  public Dictionary getStaticLabel(String obj_id){
+    if(d.get(obj_id) != null)
+      return (Dictionary) d.get(obj_id);
     return null;
   }
   public boolean saveLabel(String obj_id,Dictionary label){
@@ -46,9 +49,12 @@ public class LabelManager
 //      newLabel.put("owner",((Dictionary)(d.get(obj_id).get("owner")));
 //      newLabel.put("readers",d.get(obj_id).
       d.put(obj_id,objLabel);
-      if(checkPrivate(objLabel) && fieldsLocals.containsKey(obj_id)){
+      if(checkPrivate(objLabel)){
 //        System.out.println("updating fields"+fieldsLocals);
-        updateFields(obj_id);
+        if(fieldsLocals.containsKey(obj_id))
+          updateFields(obj_id);
+        else if(staticFields.containsKey(obj_id))
+          updateStatics(obj_id);
       }
       return true;
     }
@@ -56,6 +62,8 @@ public class LabelManager
     System.out.println(obj_id+" not updated");
     return false;
   }
+  
+  
   public static boolean updateFields(String obj_id){
     HashSet fields  = fieldsLocals.get(obj_id);
     Iterator itr = fields.iterator();
@@ -65,12 +73,20 @@ public class LabelManager
       if(! privateFields.contains(field))
       {
         System.out.println("=======================================================");
-        System.out.println("Adding "+field);
+        System.out.println("Adding to private fields "+field);
         System.out.println("======================================================="); 
         
         privateFields.add(field);
       }
     }
+    return false;
+  }
+  public static boolean updateStatics(String obj_id){
+    String statics = staticFields.get(obj_id);
+    System.out.println("=======================================================");
+    System.out.println("Adding to privateStatics fields "+obj_id);
+    System.out.println("=======================================================");
+    privateStaticFields.add(statics);
     return false;
   }
   public static boolean checkPrivate(Dictionary label){
