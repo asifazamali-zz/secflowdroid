@@ -53,14 +53,13 @@ public class InformationFlowAnalysis
   public static Map          unitToGenerateSet;
   public static LabelManager labelManager;
   public static MakeRWLabel  makeRWLabel;
-  public static       String       className;
-  public static       String       mthdName;
-  public static StatementHanding statementHanding;
-  public  HashSet<String> refLocals;
+  public String       className;
+  public String       mthdName;
+  public StatementHanding statementHanding;
   public ArrayList<Dictionary> paraLabels;
   public int paraIndex;
   public UnitGraph g;
-  public InformationFlowAnalysis(UnitGraph g, LabelManager lblManager, Dictionary subLbl, String className, String mthdName,ArrayList paraLabels)
+  public InformationFlowAnalysis(UnitGraph g, LabelManager lblManager, Dictionary subLbl, String className, String mthdName,ArrayList paraLabels,StatementHanding statementHanding)
   {
 //    super(g);
     labelManager = Util.labelManager;
@@ -69,20 +68,9 @@ public class InformationFlowAnalysis
     this.mthdName = mthdName;
     this.g = g;
     this.paraLabels = paraLabels;
+    this.statementHanding = statementHanding;
     paraIndex = -1;
     unitToGenerateSet = new HashMap();
-    Body b = g.getBody();
-    refLocals = new HashSet<>();
-    Iterator localIt = b.getLocals().iterator();
-    while (localIt.hasNext())
-    {
-      Local l = (Local) localIt.next();
-      System.out.println(l.getName());
-      refLocals.add(l.toString());
-    }
-    statementHanding = new StatementHanding(className,mthdName,refLocals);
-    
-  
 //    Iterator unitIt = b.getUnits().iterator();
 //    while(unitIt.hasNext()){
 //      Unit u = (Unit) unitIt.next();
@@ -348,8 +336,8 @@ public class InformationFlowAnalysis
 
 
   public Dictionary handleStatement(Iterator itr, Unit s){
-    ps.println(s);
-    System.out.println(s);
+    ps.println("stmt "+s);
+    System.out.println("method "+mthdName+ " stmt "+s);
     Dictionary ret = null;
 //    System.out.println("handle statement called");
     if (s instanceof DefinitionStmt)
@@ -408,9 +396,15 @@ public class InformationFlowAnalysis
       System.out.println("invokeExper"+s);
       ret = null;
     }
+    else if (s instanceof ReturnStmt){
+      System.out.println("ReturnStmt");
+      
+      ret = statementHanding.handleReturnStmt(s);
+      System.out.println("return ReturnStmt"+ret);
+    }
     else
     {
-      System.out.println("handleStatement else");
+      System.out.println("handleStatement+  else");
       System.out.println(s);
       ret = null;
     }

@@ -22,13 +22,19 @@ public class Main {
 //        Config.init();
 //        CallGraph cg = Util.generateCG();
 //        Util.printCG(cg, System.out);
-
+        String apkPath = null,processedFile =null;
+        apkPath = args[0];
+        processedFile = args[1];
+        if(apkPath == null || processedFile == null){
+            System.out.println("Provide apkPath and logFile");
+            System.exit(1);
+        }
         generateCGForAPK(
                 // TODO @Yuxuan, replace this with your APK path
-                "/home/asif/MTP/Experiments/apimonitor/APIMonitor-beta/apks_old/Contacts_Intent.apk",
+                apkPath,
                 "output",
                 "android.jar",
-                "/home/asif/MTP/Experiments/apimonitor/APIMonitor-beta/logs/Contacts_Intent.log",
+                processedFile,
                 "sensitive_apis.txt",
                 "global_output_apis.txt");
 

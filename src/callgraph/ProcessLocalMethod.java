@@ -22,7 +22,6 @@ import static Main.java.Util.*;
  */
 public class ProcessLocalMethod
 {
-  public RWLabel rwLabel;
   public SootMethod sootMethod;
   String  className;
   HashSet refLocals;
@@ -33,6 +32,13 @@ public class ProcessLocalMethod
     this.sootMethod = sootMethod;
     this.className = className;
     this.paraLabels = paraLabels;
+    ps.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+    ps.println(className+"."+sootMethod.getName().toString());
+    ps.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+    System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+    System.out.println(className+"."+sootMethod.getName().toString());
+    System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+
     b = sootMethod.retrieveActiveBody();
     g = new ExceptionalUnitGraph(b);
   }
@@ -42,9 +48,18 @@ public class ProcessLocalMethod
     String methodName = sootMethod.getName();
     Iterator itr = units.iterator();
     Dictionary ret = null;
-    InformationFlowAnalysis informationFlowAnalysis = new InformationFlowAnalysis(g,labelManager,subLabel,className,methodName,paraLabels);
+    refLocals = new HashSet<>();
+    Iterator localIt = b.getLocals().iterator();
+    while (localIt.hasNext())
+    {
+      Local l = (Local) localIt.next();
+      System.out.println(l.getName());
+      refLocals.add(l.toString());
+    }
+    StatementHanding statementHanding = new StatementHanding(className,methodName,refLocals);
+    InformationFlowAnalysis informationFlowAnalysis = new InformationFlowAnalysis(g,labelManager,subLabel,className,methodName,paraLabels,statementHanding);
     ret = informationFlowAnalysis.trials();
-    System.out.println("returning from processingLocalMethod "+ret);
+    System.out.println("returning from processingLocalMethod "+methodName+" "+ret);
     return ret;
   }
   

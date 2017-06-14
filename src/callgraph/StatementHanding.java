@@ -103,21 +103,22 @@ public class StatementHanding
     String method = sootMethod.getName();
 
     String cName = sootMethod.getDeclaringClass().getName();
-    System.out.println("Class :" + cName + " method :" + method);
+    System.out.println("Class :" + cName + " method :" + method+"current Method: "+mthdName);
 
     if (cName.contains(Util.appPackageName) && !method.contains("<init>"))
     {
-      processedClassNames.add(className+mthdName+cName+method);
+//      processedClassNames.add(className+mthdName+cName+method);
       System.out.println("Parse Method: " + method+"inside class "+className+"."+mthdName+"."+cName+"."+method);
-      System.out.println(processedClassNames);
+//      System.out.println(processedClassNames);
       ArrayList<String> paraLabels = getParameters(invokeExpr,className,mthdName);
       ProcessLocalMethod processLocalMethod = new ProcessLocalMethod(cName,sootMethod,paraLabels);
       ret = processLocalMethod.processLocalMethod();
       System.out.println("Returning from processLocalMethod");
-      System.out.println("----------------------------------------------");
-      System.out.println(LabelManager.d);
-      System.out.println("----------------------------------------------");
-      System.out.println(Util.global_output_api_method);
+      System.out.println("current method "+ mthdName);
+//      System.out.println("----------------------------------------------");
+//      System.out.println(LabelManager.d);
+//      System.out.println("----------------------------------------------");
+//      System.out.println(Util.global_output_api_method);
 //            labelManager.updateLabel(lo.toString(),labelManager.getLabel(ro.toString()));
     }
     
@@ -160,7 +161,7 @@ public class StatementHanding
       List<Value> args = invokeExpr.getArgs();
       Dictionary publicLabel1 = null;
       Dictionary publicLabel2 = createPublicLabel("dummyPublicLabel2");
-      ;
+      
       if (invokeExpr.getArgCount() > 0)
       {
         publicLabel1 = createPublicLabel("dummyPublicLabel1");
@@ -181,6 +182,13 @@ public class StatementHanding
       
 //      ro   = LUB{publicLabel2, base}
 //      base = ro
+      if(base !=null){
+        System.out.println("className "+className);
+        System.out.println("method "+mthdName);
+        System.out.println("base "+base.toString());
+        System.out.println(refLocals);
+        System.out.println(refLocals.contains(base.toString()));
+      }
       if (base != null && refLocals.contains(base.toString()))
       {
         checkAndDef(base.toString(), className, mthdName);
@@ -198,6 +206,8 @@ public class StatementHanding
           labelManager.updateLabel(obj_id, publicLabel2);
         }
       }
+      
+      
       if (Util.global_output_api_method.containsKey(cName) && Util.global_output_api_method.get(cName).contains(method))
       {
         System.out.println("Inside global_output_apis_method");
@@ -210,7 +220,10 @@ public class StatementHanding
         System.out.println("Sensitive api :" + cName + " " + method);
 
         System.out.println("-----------------------------------------------");
+        ps.println("-----------------------------------------------");
+        ps.println("Sensitive api :" + cName + " " + method);
 
+        ps.println("-----------------------------------------------");
         Dictionary privateLabel = Util.makeRWLabel.createPrivateLabel();
         subLabel = new RWLabel().checkRead(subLabel, privateLabel, labelManager);
         System.out.println("changed subLabel " + subLabel);
@@ -223,6 +236,7 @@ public class StatementHanding
       }
       ret = publicLabel2;
     }
+    System.out.println("methodName "+mthdName);
     System.out.println("returning from assignment "+ret);
     return ret;
   }
@@ -311,6 +325,7 @@ public class StatementHanding
       String obj_id = createObjId(leftOp, className, mthdName);
       System.out.println("obj_id" + obj_id);
       checkAndDef(leftOp.toString(), className, mthdName);
+      ret = new RWLabel().checkRead(ret,labelManager.getLabel(leftOp.toString(),className,mthdName),labelManager);
       labelManager.updateLabel(obj_id, ret);
 
       addLocalToField(obj_id, className + "." + signature);
@@ -320,10 +335,10 @@ public class StatementHanding
 
         privateFields.add(className + "." + signature);
         System.out.println("---------------------------------------------------------------------------");
-        System.out.println("Sensitive Field Stored :" + ro);
+        System.out.println("Sensitive Field Stored :" + className + "." + signature);
         System.out.println("---------------------------------------------------------------------------");
         ps.println("---------------------------------------------------------------------------");
-        ps.println("Sensitive Field Stored :" + ro);
+        ps.println("Sensitive Field Stored :" + className + "." + signature);
         ps.println("---------------------------------------------------------------------------");
       }
     }
@@ -370,6 +385,7 @@ public class StatementHanding
       ret = handleLocalStatement(ro);
     }
     else if(ro instanceof ArrayRef){
+      System.out.println("ro +ArrayRef");
       Value rightOpt = ((ArrayRef) ro).getBase();
       ret  = handleRightOperand(lo,rightOpt);
     }
@@ -381,7 +397,7 @@ public class StatementHanding
     }
     else if(ro instanceof NewExpr)
     {
-      
+      System.out.println("ro + newExprt");
       Type type = ro.getType();
       System.out.println("newExpr" + ro.getType());
       if (sensitive_class.contains(type.toString()))
@@ -398,6 +414,7 @@ public class StatementHanding
     }
     else if(ro instanceof CastExpr)
     {
+      System.out.println("ro+Cast");
       Value val =((CastExpr) ro).getOp();
       Type tpe = ro.getType();
       if(sensitive_class.contains(tpe.toString())){
@@ -417,6 +434,7 @@ public class StatementHanding
     {
 //      System.out.println(((AbstractInstanceFieldRef) ro).getBase());
 //      System.out.println(((AbstractInstanceFieldRef) ro).getField().getSignature());
+      System.out.println("ro+AbstractFieldRef");
       Value base = ((AbstractInstanceFieldRef) ro).getBase();
       String signature = ((AbstractInstanceFieldRef) ro).getField().getDeclaration().toString();
       String obj_id = createObjId(base.toString(),className,mthdName);
@@ -437,6 +455,7 @@ public class StatementHanding
 
       }
       else{
+        System.out.println("ro+AbstractFieldRef+else "+labelManager.getLabel(base.toString(),className,mthdName));
         Dictionary publicLabel = createPublicLabel("dummyPublicLabel."+className+"."+mthdName);
         if(base != null){
           publicLabel = new RWLabel().checkRead(publicLabel,labelManager.getLabel(base.toString(),className,mthdName),labelManager);
@@ -493,15 +512,21 @@ public class StatementHanding
       publicLabel = new RWLabel().checkRead(publicLabel,labelManager.getLabel(v.toString(),className,mthdName),labelManager);
 //      new RWLabel().checkRead(subLabel,labelManager.getLabel(val.toString(),className,mthdName),labelManager);
     }
-    else if(v instanceof JEqExpr || v instanceof JNeExpr){
+    else if(v instanceof JEqExpr || v instanceof JNeExpr)
+    {
       System.out.println(v);
       AbstractBinopExpr abstractBinopExpr = (AbstractBinopExpr) v;
       Value lo = abstractBinopExpr.getOp1();
       Value ro = abstractBinopExpr.getOp2();
-      checkAndDef(lo.toString(),className,mthdName);
-      checkAndDef(ro.toString(),className,mthdName);
-      publicLabel = new RWLabel().checkRead(publicLabel,labelManager.getLabel(lo.toString(),className,mthdName),labelManager);
-      publicLabel = new RWLabel().checkRead(publicLabel,labelManager.getLabel(ro.toString(),className,mthdName),labelManager);
+      checkAndDef(lo.toString(), className, mthdName);
+
+      publicLabel = new RWLabel().checkRead(publicLabel, labelManager.getLabel(lo.toString(), className, mthdName), labelManager);
+      if (refLocals.contains(ro.toString()))
+      {
+        checkAndDef(ro.toString(), className, mthdName);
+        publicLabel = new RWLabel().checkRead(publicLabel, labelManager.getLabel(ro.toString(), className, mthdName), labelManager);
+
+      }
     }
     while(itr.hasNext()){
       Unit unit = (Unit) itr.next();
@@ -512,11 +537,15 @@ public class StatementHanding
       }
       else if(unit instanceof ReturnStmt)
       {
+        System.out.println("handleIf+Return" +unit);
         ret = handleReturn(unit);
-        return ret;
+//        return ret;
       }
       else
-        ret =  info.handleStatement(itr,unit);
+      {
+        System.out.println("handleIF+handleStatement"+unit);
+        ret = info.handleStatement(itr, unit);
+      }
       if(ret != null){
         publicLabel = new RWLabel().checkRead(publicLabel,ret,labelManager);
       }
@@ -567,7 +596,14 @@ public class StatementHanding
     }
     return null;
   }
-  
+  public Dictionary handleReturnStmt(Unit u){
+    String returnValue = ((ReturnStmt) u).getOp().toString();
+//    System.out.println(returnValue);
+    if(refLocals.contains(returnValue)){
+      return labelManager.getLabel(returnValue,className,mthdName);
+    }
+    return null;
+  }
 //  public boolean handleIfStmt(Unit s){
 //    System.out.println("If stmt");
 //    Value v = ((IfStmt) s).getCondition();

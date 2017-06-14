@@ -43,12 +43,12 @@ public class RWLabel
       ret = newsubLabel;
     } else
     {
-      Util.ps.println("***************** misuse *************");
+      Util.ps.println("!!!!!!!!!!!!!!!!! misuse !!!!!!!!!!!!!");
       Util.ps.println("subLabel "+subLabel+" tries to read "+objLabel);
-      Util.ps.println("***************** misuse *************");
-      System.out.println("***************** misuse *************");
+      Util.ps.println("!!!!!!!!!!!!!!!!! misuse !!!!!!!!!!!!!");
+      System.out.println("!!!!!!!!!!!!!!!!! misuse !!!!!!!!!!!!!");
       System.out.println("subLabel "+subLabel+" tries to read "+objLabel);
-      System.out.println("***************** misuse *************");
+      System.out.println("!!!!!!!!!!!!!!!!! misuse !!!!!!!!!!!!!");
       ret = subLabel;
     }
     return ret;
@@ -61,12 +61,12 @@ public class RWLabel
           return true;
     }
     else{
-      Util.ps.println("***************** misuse *************");
+      Util.ps.println("!!!!!!!!!!!!!!!!! misuse !!!!!!!!!!!!!");
       Util.ps.println("subLabel "+subLabel+" tries to write "+objLabel);
-      Util.ps.println("***************** misuse *************");
-      System.out.println("***************** misuse *************");
+      Util.ps.println("!!!!!!!!!!!!!!!!! misuse !!!!!!!!!!!!!");
+      System.out.println("!!!!!!!!!!!!!!!!! misuse !!!!!!!!!!!!!");
       System.out.println("subLabel "+subLabel+" tries to write "+objLabel);
-      System.out.println("***************** misuse *************");
+      System.out.println("!!!!!!!!!!!!!!!!! misuse !!!!!!!!!!!!!");
     }
     return false;
   }

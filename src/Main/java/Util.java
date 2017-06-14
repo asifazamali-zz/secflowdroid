@@ -3,6 +3,7 @@ import Main.java.MakeRWLabel;
 import beaver.*;
 import beaver.Scanner;
 import callgraph.InformationFlowAnalysis;
+import callgraph.StatementHanding;
 import fj.Hash;
 import fj.data.Array;
 import ifc.LabelManager;
@@ -188,18 +189,18 @@ public class Util {
                 dict_class_method.put(sootClass,methodList);
             }    
         }
-        getJimpleFile();   //<-----------gives only jimple file
+//        getJimpleFile();   //<-----------gives only jimple file
 
-//       flowControl();        //<----------- labeling
+       flowControl();        //<----------- labeling
 
     }
     public static void getJimpleFile()
     {
         for (int i = 0; i < classes.size(); i++)
         {
-            ps.println("---------------------------------------------------");
+            ps.println("**************************************************");
             ps.println(classes.get(i) + "." + methods.get(i) + "." + apis.get(i));
-            ps.println("---------------------------------------------------");
+            ps.println("***************************************************");
 
             SootMethod sootMethod = (SootMethod) dict_methodName_method.get(methods.get(i));
 
@@ -220,22 +221,31 @@ public class Util {
     }
     public static void flowControl(){
         Util.ps.println("flowAnalysis");
-        
+        HashSet refLocals;
         createSubjectLabel();
         for(int i =0;i<classes.size();i++){
-            ps.println("---------------------------------------------------");
-            ps.println(classes.get(i)+"."+methods.get(i)+"."+apis.get(i));
-            ps.println("---------------------------------------------------");
-            System.out.println("---------------------------------------------------");
+            ps.println("**************************************************");
+            ps.println(classes.get(i) + "." + methods.get(i) + "." + apis.get(i));
+            ps.println("***************************************************");
+            System.out.println("**************************************************");
             System.out.println(classes.get(i)+"."+methods.get(i)+"."+apis.get(i));
-            System.out.println("---------------------------------------------------");
+            System.out.println("**************************************************");
             SootMethod sootMethod = (SootMethod) dict_methodName_method.get(methods.get(i));
             if(sootMethod != null)
             {
                 Body b = sootMethod.retrieveActiveBody();
                 UnitGraph unitGraph = new ExceptionalUnitGraph(b);
                 ArrayList<Dictionary> paraLabels = new ArrayList();
-                InformationFlowAnalysis informationFlowAnalysis = new InformationFlowAnalysis(unitGraph, labelManager, subLabel, convertClass(classes.get(i)), methods.get(i),paraLabels);
+                refLocals = new HashSet<>();
+                Iterator localIt = b.getLocals().iterator();
+                while (localIt.hasNext())
+                {
+                    Local l = (Local) localIt.next();
+                    System.out.println(l.getName());
+                    refLocals.add(l.toString());
+                }
+                StatementHanding statementHanding = new StatementHanding(classes.get(i),methods.get(i),refLocals);
+                InformationFlowAnalysis informationFlowAnalysis = new InformationFlowAnalysis(unitGraph, labelManager, subLabel, convertClass(classes.get(i)), methods.get(i),paraLabels,statementHanding);
 
                 informationFlowAnalysis.trials();
 //                Iterator itr = unitGraph.iterator();
@@ -304,7 +314,7 @@ public class Util {
 
     public static boolean checkAndDef(String _id, String className, String methodName)
     {
-        if(_id == null)
+        if(_id == null || _id == "0" || _id == "true" || _id == "false")
             return false;
         Dictionary lolabel = labelManager.getLabel(_id, className, methodName);
         System.out.println("Check and Def "+_id+" "+lolabel);
