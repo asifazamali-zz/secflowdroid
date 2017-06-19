@@ -1,5 +1,5 @@
 # SecFlowDroid
-secFlowDroid built on modifying soot-infoflow-android which is a part of flowDroid tool. It performs information flow analysis of android applications.
+secFlowDroid built on modifying soot-infoflow-android which is a part of flowDroid tool. It performs information flow analysis of android applications using RWFM model.
 
 
 
