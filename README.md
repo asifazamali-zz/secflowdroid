@@ -11,7 +11,10 @@ secFlowDroid built on modifying soot-infoflow-android which is a part of flowDro
   ```
    Module SDK: Project SDK (1.7)
    Java Version: 1.7
-    Import jars
+   ```
+   
+3. Import Jars Dependency
+  ```
    soot-infoflow.jar
    soot-trunk.jar
    slf4j-simple-1.7.5.jar
@@ -19,8 +22,8 @@ secFlowDroid built on modifying soot-infoflow-android which is a part of flowDro
    axml-2.0.jar
    commons-cli-1.3.1.jar
   ```
-3. Set path of `apk File` and `log file` from apiMonitor
-4. Run `Main.java` from  source
+4. Set path of `apk File` and `log file` from apiMonitor
+5. Run `Main.java` from  source
 For more information visit:
  APK_CG : https://github.com/ylimit/APK_CG  
  soot-infoflow-android-wiki: https://github.com/secure-software-engineering/soot-infoflow-android/wiki
