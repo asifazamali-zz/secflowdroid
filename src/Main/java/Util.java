@@ -48,34 +48,18 @@ public class Util {
     public static HashSet<String> privateStaticFields =  new HashSet<>();
     public static HashMap<String,String> varIntent = new HashMap<>();
     public static HashMap<String,String> classVar = new HashMap<>();
-//        long timeMillis = System.currentTimeMillis();
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-hhmmss");
-//        Date date = new Date(timeMillis);
-//        return sdf.format(date);
-//    }
 
-//    public static void logException(Exception e) {
-//        StringWriter sw = new StringWriter();
-//        e.printStackTrace(new PrintWriter(sw));
-//        Util.LOGGER.warning(sw.toString());
-//    }
-//
-//    public static float safeDivide(int obfuscated, int total) {
-//        if (total <= 0) return 1;
-//        return (float) obfuscated / total;
-//    }
-//
-//    public static CallGraph generateCG() {
-//        PackManager.v().runPacks();
-//        return Scene.v().getCallGraph();
-//    }
-//    
     
     public static void readLogFile(){
         try{
             BufferedReader bufferedReader = new BufferedReader(new FileReader(Config.filesToProcess));
             String line = bufferedReader.readLine();
             HashSet<String> hashSet = new HashSet<>();
+            /*each line is in the form of 
+            V/DroidBox( <some_number>): <name_of_class> -> <name_of_member_function> -> <api_class_name> -> <api_name>  
+            storing hashSet with keys as (<name_of_class>+" "+<name_of_member_function>) and values as(<api_class_name+" "+<api_name>)
+            
+             */
             while(line!=null)
             {
                 String[] parts = line.split(":");
@@ -99,11 +83,19 @@ public class Util {
             e.printStackTrace();
         }
     }
+    
+    
     public static void readSensitiveApiFile(){
         try{
             BufferedReader bufferedReader = new BufferedReader(new FileReader(Config.sensitiveApiFile));
             System.out.println("sensitive_apis.txt");
             String line = bufferedReader.readLine();
+            /*
+            Each line can be :
+            Landroid/location/Location; ---> store as a sensitive class (used for handling static variables )
+             or 
+             Landroid/location/Location;->getLongitude --> stored as a sensitive function
+             */
             while(line!=null){
                 String[] parts = line.split("->");
                 System.out.println(line);
@@ -133,6 +125,10 @@ public class Util {
         try{
             BufferedReader bufferedReader = new BufferedReader(new FileReader(Config.outputGlobalFile));
             String line = bufferedReader.readLine();
+            
+            /*
+            same as readSensitiveApiFile
+             */
             while(line!=null){
                 System.out.println(line);
                 String[] parts = line.split("->");
@@ -150,6 +146,10 @@ public class Util {
             e.printStackTrace();
         }
     }
+    
+    
+    /* whole processing starts here */
+    
     public static void processing(String apkPath){
         try
         {
@@ -160,17 +160,23 @@ public class Util {
         catch(Exception e){
             e.printStackTrace();
         }
+        
+        /*setting logger output stream */
+        
         ps = Config.getResultPs();
         System.out.println("Reading log file");
         readLogFile();
-        System.out.println("Reading sensitiveApi file");
+        System.out.println("Reading sensitiveApi (source) file");
         readSensitiveApiFile();
-        System.out.println("Reading global output file");
+        System.out.println("Reading global output (sink) file");
         readGlobalOutputFile();
         Chain<SootClass> classes = Scene.v().getClasses();
         Iterator<SootClass> sootClassIterator = classes.iterator();
         HashSet<SootClass> sootClassHashSet = new HashSet<SootClass>();
         System.out.println("package name"+ appPackageName);
+        /*
+        iterate over classes
+         */
         while(sootClassIterator.hasNext())
         {
             SootClass sootClass = sootClassIterator.next();
@@ -184,16 +190,27 @@ public class Util {
                 while(methodIterator.hasNext()){
                     SootMethod sootMethod = methodIterator.next();
                       System.out.println(sootMethod.getName());
+                      /*
+                      used for mapping - methodName -> sootMethod
+                       */
                     dict_methodName_method.put(sootMethod.getName(),sootMethod);
                 }
+                /*
+                dict - sootClass -> listof methods in class
+                 */
                 dict_class_method.put(sootClass,methodList);
             }    
         }
 //        getJimpleFile();   //<-----------gives only jimple file
 
-       flowControl();        //<----------- labeling
+       flowControl();        //<----------- Labeling
 
     }
+    
+    
+    /*
+    print jimple file of apk using ps logger outputstream in cg.txt file
+     */
     public static void getJimpleFile()
     {
         for (int i = 0; i < classes.size(); i++)
@@ -219,8 +236,13 @@ public class Util {
             }
         }
     }
+    /*
+    prints jimple with label in cg.txt and sensitive apis and reporting of misuses, gives logs info on outputstream
+     */
+    
+    
     public static void flowControl(){
-        Util.ps.println("flowAnalysis");
+        ps.println("flowAnalysis");
         HashSet refLocals;
         createSubjectLabel();
         for(int i =0;i<classes.size();i++){
@@ -231,6 +253,9 @@ public class Util {
             System.out.println(classes.get(i)+"."+methods.get(i)+"."+apis.get(i));
             System.out.println("**************************************************");
             SootMethod sootMethod = (SootMethod) dict_methodName_method.get(methods.get(i));
+            /*
+            Iterate over each method of filtered class
+             */
             if(sootMethod != null)
             {
                 Body b = sootMethod.retrieveActiveBody();
@@ -238,6 +263,7 @@ public class Util {
                 ArrayList<Dictionary> paraLabels = new ArrayList();
                 refLocals = new HashSet<>();
                 Iterator localIt = b.getLocals().iterator();
+                /*store locals(normal as well as stack variables)  of each method in refLocals */
                 while (localIt.hasNext())
                 {
                     Local l = (Local) localIt.next();
@@ -247,18 +273,16 @@ public class Util {
                 StatementHanding statementHanding = new StatementHanding(classes.get(i),methods.get(i),refLocals);
                 InformationFlowAnalysis informationFlowAnalysis = new InformationFlowAnalysis(unitGraph, labelManager, subLabel, convertClass(classes.get(i)), methods.get(i),paraLabels,statementHanding);
 
-                informationFlowAnalysis.trials();
-//                Iterator itr = unitGraph.iterator();
-//                while (itr.hasNext())
-//                {
-//                    Unit u = (Unit) itr.next();
-//                    ps.println(u.toString());
-//                }
+                informationFlowAnalysis.iterateOverGraph();
+
             }
         }
     }
     
-
+    /*
+    Converts
+            : Landroid/location/Location;-> android.location.Location
+     */
     
     public static String convertClass(String str){ 
         String str1 = str.split("L",2)[1];
@@ -266,6 +290,10 @@ public class Util {
         str1 =str2.split(";",2)[0];
         return str1;
     }
+    /*
+    Create public label(appPackageName, {appPackageName, public}, {appPackageName})
+     */
+    
     public static Dictionary createPublicLabel(String obj_id){
         Dictionary ret;
         makeRWLabel = new MakeRWLabel();
@@ -280,6 +308,8 @@ public class Util {
         labelManager.saveLabel(obj_id,ret);
         return ret;
     }
+    
+    /*create subJect Label publicLabel with S1 as owner */
     public static void createSubjectLabel(){
         
         subLabel = createPublicLabel("S1"); // subjectLevel(packageName,packageName,packageName)
@@ -295,6 +325,14 @@ public class Util {
 //        String obj_id = createObjId(var,className,methodName);
         System.out.println(var+" "+labelManager.getLabel(var,className,methodName));
     }
+    
+    /* given an id in simple variable name 
+    check if it has label defined 
+        update label with sublabel
+    else
+        create label with given sublabel
+     */
+    
     public static void checkAndUpdate(String _id,String className,String methodName){
         String obj_id = createObjId(_id,className,methodName);
         if(checkAndDef(_id,className,methodName))
@@ -306,12 +344,19 @@ public class Util {
             System.out.println("label created");
         }
     }
+    
+    /*
+    create privateLabel(appPackageName, {appPackageName},{appPackageName})
+     */
     public static boolean checkPrivateField(String obj_id,String className,String methodName){
         if(((Set)labelManager.getLabel(obj_id,className,methodName).get("writers")).size()>1)
             return true;
         return false;
     }
-
+    /*given  _id of variable in simple name check if its label defined otherwise initialize the variable label as publicLabel
+    
+     */
+    
     public static boolean checkAndDef(String _id, String className, String methodName)
     {
         if(_id == null || _id == "0" || _id == "true" || _id == "false")
@@ -327,6 +372,13 @@ public class Util {
         }
         return true;
     }
+    /* maintaining local private fields assigned to a variable 
+           $r1.cacad = acdadfa;
+           <$r1, cacad>
+           
+    
+    */
+    
     public static boolean addLocalToField(String key, String value){
         if(fieldsLocals.containsKey(key)){
             if(!fieldsLocals.get(key).contains(value))
@@ -346,19 +398,7 @@ public class Util {
         return false;
     }
     
-//    public static boolean addStaticField(String key, String value){
-//        if(staticFields.containsKey(key)){
-//            if(!staticFields.get(key).contains(value))
-//                staticFields.get(key).add(value);
-//            return true;
-//        }
-//        else{
-//            HashSet hashSet = new HashSet();
-//            hashSet.add(value);
-//            staticFields.put(key,hashSet);
-//        }
-//        return false;
-//    }
+    /*given a _id return its absolute id( id+className+methodName) */
     
     public static String createObjId(String obj_id,String className,String methodName){
         return className+"."+methodName+"."+obj_id;

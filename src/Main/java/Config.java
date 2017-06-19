@@ -93,7 +93,7 @@ public class Config {
             }
             if (cmd.hasOption('o')) {
                 Config.outputDir = cmd.getOptionValue('o');
-                File workingDir = new File(String.format("%s/APK_CG/",
+                File workingDir = new File(String.format("%s/SecFlowDroid/",
                         Config.outputDir));
 
                 Config.outputDir = workingDir.getPath();

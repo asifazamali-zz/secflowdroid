@@ -14,17 +14,15 @@ import java.util.Iterator;
 public class Main {
     public static void main(String[] args) {
         
-
-//        if (!Config.parseArgs(args)) {
-//            return;
-//        }
-//
-//        Config.init();
-//        CallGraph cg = Util.generateCG();
-//        Util.printCG(cg, System.out);
+        /*first run APIMonitor*/ 
+        
+        /* apk path and processedFile contains absolute path of apk and log file generated from APIMonitor */
+        /* can also passed with command line arguments */
         String apkPath = null,processedFile =null;
-        apkPath = args[0];
-        processedFile = args[1];
+        apkPath = "/home/asif/MTP/Experiments/apimonitor/APIMonitor-beta/apks_old/GPS_SMS.apk";
+        processedFile = "/home/asif/MTP/Experiments/apimonitor/APIMonitor-beta/logs/GPS_SMS.log";
+        //        apkPath = args[0];
+//        processedFile = args[1];
         if(apkPath == null || processedFile == null){
             System.out.println("Provide apkPath and logFile");
             System.exit(1);
@@ -32,11 +30,11 @@ public class Main {
         generateCGForAPK(
                 // TODO @Yuxuan, replace this with your APK path
                 apkPath,
-                "output",
+                "output", 
                 "android.jar",
                 processedFile,
-                "sensitive_apis.txt",
-                "global_output_apis.txt");
+                "sensitive_apis.txt", /*sensitive api (source) file */
+                "global_output_apis.txt"); /*global output (sink) file */
 
     }
 
@@ -51,6 +49,8 @@ public class Main {
         /////////////////////////////////////////
         try
         {
+            /*get appPackageName */
+            
             ProcessManifest processManifest = new ProcessManifest(apkPath);
             appPackageName = processManifest.getPackageName();
             System.out.println(appPackageName);
@@ -62,28 +62,8 @@ public class Main {
            Util.processing(apkPath);
         
         
-        /////////////////////////////////////////
-//        Chain<SootClass> classes = Scene.v().getClasses();
-//        Iterator<SootClass> sootClassIterator = classes.iterator();
-//        HashSet<SootClass> sootClassHashSet = new HashSet<SootClass>();
-//        while(sootClassIterator.hasNext())
-//        {
-//            SootClass sootClass = sootClassIterator.next();
-//            String className = sootClass.getName();
-//            if(className.contains(appPackageName))
-//                sootClassHashSet.add(sootClass);
-//        }
-//        printSootClassHashSet(sootClassHashSet); 
-//        CallGraph cg = Util.generateCG();
-//        // TODO @Yuxuan, replace this with your cg2dot
-//        Util.printCG(cg, Config.getResultPs(),appPackageName);
+
     }
-//    public static void printSootClassHashSet(HashSet<SootClass> sootClassHashSet){
-//        Iterator<SootClass> sootClassIterator = sootClassHashSet.iterator();
-//        while(sootClassIterator.hasNext()){
-//            String className = sootClassIterator.next();
-//            System.out.println("class:"+className
-//        }
-//    }
+
 
 }

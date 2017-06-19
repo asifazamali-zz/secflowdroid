@@ -337,9 +337,9 @@ public class StatementHanding
         System.out.println("---------------------------------------------------------------------------");
         System.out.println("Sensitive Field Stored :" + className + "." + signature);
         System.out.println("---------------------------------------------------------------------------");
-        ps.println("---------------------------------------------------------------------------");
-        ps.println("Sensitive Field Stored :" + className + "." + signature);
-        ps.println("---------------------------------------------------------------------------");
+//        ps.println("---------------------------------------------------------------------------");
+//        ps.println("Sensitive Field Stored :" + className + "." + signature);
+//        ps.println("---------------------------------------------------------------------------");
       }
     }
     else if(ro instanceof StaticFieldRef){
@@ -449,9 +449,9 @@ public class StatementHanding
         System.out.println("---------------------------------------------------------------------------");
         System.out.println("Sensitive Field Access :"+ ro);
         System.out.println("---------------------------------------------------------------------------");
-        ps.println("---------------------------------------------------------------------------");
-        ps.println("Sensitive Field Access :"+ ro);
-        ps.println("---------------------------------------------------------------------------");
+//        ps.println("---------------------------------------------------------------------------");
+//        ps.println("Sensitive Field Access :"+ ro);
+//        ps.println("---------------------------------------------------------------------------");
 
       }
       else{

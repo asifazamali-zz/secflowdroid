@@ -71,55 +71,21 @@ public class InformationFlowAnalysis
     this.statementHanding = statementHanding;
     paraIndex = -1;
     unitToGenerateSet = new HashMap();
-//    Iterator unitIt = b.getUnits().iterator();
-//    while(unitIt.hasNext()){
-//      Unit u = (Unit) unitIt.next();
-//      System.out.println(u.toString());
-//      unitToGenerateSet.put(u,new ArraySparseSet());
-//      if(u instanceof DefinitionStmt){
-//        Value lo = ((DefinitionStmt) u).getLeftOp();
-//        if(lo instanceof Local && lo.getType() instanceof RefLikeType)
-//          addGensFor((DefinitionStmt)u);
-//      }
-//      Iterator boxIt = u.getUseAndDefBoxes().iterator();
-//      while(boxIt.hasNext()){
-//        Value boxValue = ((ValueBox) boxIt.next()).getValue();
-//        Value base = null;
-//
-//        if(boxValue instanceof InstanceFieldRef) {
-//          base = ((InstanceFieldRef) (boxValue)).getBase();
-//        } else if (boxValue instanceof ArrayRef) {
-//          base = ((ArrayRef) (boxValue)).getBase();
-//        } else if (boxValue instanceof InstanceInvokeExpr) {
-//          base = ((InstanceInvokeExpr) boxValue).getBase();
-//        } else if (boxValue instanceof LengthExpr) {
-//          base = ((LengthExpr) boxValue).getOp();
-//        } else if (u instanceof ThrowStmt) {
-//          base = ((ThrowStmt)u).getOp();
-//        } else if (u instanceof MonitorStmt) {
-//          base = ((MonitorStmt)u).getOp();
-//        }
-//
-//        if (base != null &&
-//          base instanceof Local &&
-//          base.getType() instanceof RefLikeType)
-//          addGen(u, base);
-//      }
-//    }
-//
-//    // Call superclass method to do work.
-//    doAnalysis();
+
     
   }
 
-  public Dictionary trials(){
-//    System.out.println("Inside trials");
+  public Dictionary iterateOverGraph(){
+    /*
+    Iterate over functionGraphs
+    and handle each statement
+     */
     Iterator itr = g.iterator();
     Dictionary ret = null;
     while(itr.hasNext())
     {
       Unit s = (Unit) itr.next();
-//      System.out.println(s);
+
       ret = handleStatement(itr, s);
     }
     return ret;
@@ -339,7 +305,9 @@ public class InformationFlowAnalysis
     ps.println("stmt "+s);
     System.out.println("method "+mthdName+ " stmt "+s);
     Dictionary ret = null;
+    
 //    System.out.println("handle statement called");
+    
     if (s instanceof DefinitionStmt)
     {
       DefinitionStmt as = (DefinitionStmt) s;
@@ -359,7 +327,7 @@ public class InformationFlowAnalysis
         ret = statementHanding.handleAssignmentStmt(s);
         System.out.println("returning Assignment statement" +ret);
       }
-      ps.println(labelManager.getLabel(lo.toString(),className,mthdName));
+      ps.println(ret);
 
     }
     else if (s instanceof IfStmt)
