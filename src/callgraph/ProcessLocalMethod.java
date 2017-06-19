@@ -58,7 +58,7 @@ public class ProcessLocalMethod
     }
     StatementHanding statementHanding = new StatementHanding(className,methodName,refLocals);
     InformationFlowAnalysis informationFlowAnalysis = new InformationFlowAnalysis(g,labelManager,subLabel,className,methodName,paraLabels,statementHanding);
-    ret = informationFlowAnalysis.trials();
+    ret = informationFlowAnalysis.iterateOverGraph();
     System.out.println("returning from processingLocalMethod "+methodName+" "+ret);
     return ret;
   }
